@@ -122,3 +122,24 @@ https://renyutong-card.onrender.com/admin   （管理密码：需在 Render 后�
 - 想固定密码：在 Glitch 项目里新建 `.env` 文件，写入一行 `ADMIN_PASSWORD=你的密码`
 
 **注意**：Glitch 免费版约 5 分钟无访问会休眠，但唤醒只要几秒（比 Render 快很多）。
+
+---
+
+## 备选方案：Vercel（自动部署、响应快、无休眠）
+
+项目已内置 Vercel 适配（`vercel.json` + `api/index.js`），推送后即可一键自动部署。
+
+1. 打开 https://vercel.com → **Sign up** → 用 GitHub 账号 `asl-op` 登录
+2. 点 **Add New → Project** → 导入仓库 `renyutong-card`
+3. Framework Preset 选 **Other**，其余保持默认，点 **Deploy**
+4. 完成后得到网址：`https://renyutong-card.vercel.app`
+
+**自动部署**：以后你 `git push` 到 GitHub，Vercel 会自动重新构建发布，无需手动操作。
+
+**重要限制（Vercel 是只读的）**：
+
+- Vercel 是无服务器平台、文件系统只读，所以**部署版上的后台「新增/编辑/删除」不可用**（会返回「只读模式」提示）
+- 想改内容：在本地改好 `data/*.json` → `git push` → Vercel 自动更新
+- 本地 `start.bat` 运行不受影响，后台编辑照常可用
+
+**国内访问**：`.vercel.app` 域名在国内访问速度较慢（实测约 12 秒），如果同学访问慢属正常现象。
