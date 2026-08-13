@@ -1,0 +1,15 @@
+{
+  "name": "任禹桐",
+  "nameEn": "REN YUTONG",
+  "title": "学生 · 开发者 · 终身学习者",
+  "intro": "在代码与文字之间，探索世界的秩序与美。",
+  "about": "你好，我是任禹桐。\n热爱编程、阅读与设计，喜欢把复杂的事情拆解成简单优雅的解决方案。\n这个网站是一张会呼吸的星空名片，记录我的项目、阅读与思考。\n欢迎你来到这里，也欢迎与我交流。",
+  "skills": ["Node.js", "JavaScript", "HTML / CSS", "Python", "UI 设计"],
+  "contact": {
+    "emails": ["d.gloss.ad@gmail.com", "3867731709@qq.com"],
+    "github": "https://github.com/asl-op",
+    "wechat": "ASL11320",
+    "qq": "3867731709",
+    "blog": ""
+  }
+}

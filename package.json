@@ -1,0 +1,14 @@
+{
+  "name": "renyutong-card",
+  "version": "1.0.0",
+  "description": "任禹桐的个人名片网站 —— 极简高级宇宙星系质感，Node.js + Express 后端，JSON 文件存储",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "任禹桐 (asl-op)",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

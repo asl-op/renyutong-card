@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>任禹桐 · 个人名片</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- 星云粒子背景（全局） + 暗角 -->
+  <canvas id="starfield"></canvas>
+  <div class="vignette"></div>
+
+  <!-- 顶部导航：4 个按钮 -->
+  <nav class="nav">
+    <a class="nav-brand" href="/">
+      <span class="nav-brand-dot"></span>
+      <span data-profile="name">任禹桐</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">主页</a>
+      <a href="/projects">项目</a>
+      <a href="/about">关于我</a>
+      <a href="/reads">阅读</a>
+    </div>
+  </nav>
+
+  <!-- 主页 Hero：个人身份一句话展示 -->
+  <main class="page page-home">
+    <section class="hero">
+      <p class="hero-eyebrow" data-profile="nameEn">REN YUTONG</p>
+      <h1 class="hero-title" data-profile="name">任禹桐</h1>
+      <p class="hero-subtitle" data-profile="title">学生 · 开发者 · 终身学习者</p>
+      <p class="hero-intro" data-profile="intro">在代码与文字之间，探索世界的秩序与美。</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/projects">查看项目</a>
+        <a class="btn btn-ghost" href="/reads">星图阅读</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部联系方式区域 -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-contact" id="footer-contact">正在加载联系方式…</div>
+      <div class="footer-meta">© <span class="footer-year">2026</span> <span data-profile="name">任禹桐</span> · 星尘名片</div>
+    </div>
+  </footer>
+
+  <script src="/js/starfield.js"></script>
+  <script src="/js/common.js"></script>
+</body>
+</html>

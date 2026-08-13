@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>关于我 · 任禹桐</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <div class="vignette"></div>
+
+  <nav class="nav">
+    <a class="nav-brand" href="/">
+      <span class="nav-brand-dot"></span>
+      <span data-profile="name">任禹桐</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">主页</a>
+      <a href="/projects">项目</a>
+      <a href="/about">关于我</a>
+      <a href="/reads">阅读</a>
+    </div>
+  </nav>
+
+  <main class="page page-about">
+    <header class="section-head">
+      <p class="section-eyebrow">ABOUT</p>
+      <h1 class="section-title">关于我</h1>
+    </header>
+
+    <div class="about-layout">
+      <!-- 左：个人介绍 + 技能标签 -->
+      <div>
+        <p class="about-bio" data-profile="about">加载中…</p>
+        <div class="skills" id="skills"></div>
+      </div>
+
+      <!-- 右：联系方式卡片 -->
+      <aside class="contact-card">
+        <h3>联系方式</h3>
+        <div class="contact-row" id="contact-list">加载中…</div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-contact" id="footer-contact">正在加载联系方式…</div>
+      <div class="footer-meta">© <span class="footer-year">2026</span> <span data-profile="name">任禹桐</span> · 星尘名片</div>
+    </div>
+  </footer>
+
+  <script src="/js/starfield.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/about.js"></script>
+</body>
+</html>

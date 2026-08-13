@@ -1,0 +1,35 @@
+[
+  {
+    "id": "p-1",
+    "title": "个人名片网站",
+    "description": "极简高级宇宙星系质感的个人名片网站：Node.js + Express 后端，原生 JS 手写星云粒子与径向星图。",
+    "tags": [
+      "Node.js",
+      "Express",
+      "Canvas"
+    ],
+    "link": "https://github.com/asl-op",
+    "createdAt": "2026-08-13"
+  },
+  {
+    "id": "p-2",
+    "title": "示例项目二",
+    "description": "这是一个演示卡片，可在后台管理页新增、编辑或删除。",
+    "tags": [
+      "JavaScript"
+    ],
+    "link": "",
+    "createdAt": "2026-08-13"
+  },
+  {
+    "id": "p-3",
+    "title": "示例项目三",
+    "description": "轻量化、不使用重型前端框架，保持纯粹的原生手写实现。",
+    "tags": [
+      "HTML / CSS",
+      "Design"
+    ],
+    "link": "",
+    "createdAt": "2026-08-13"
+  }
+]

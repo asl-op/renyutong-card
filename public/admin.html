@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后台管理 · 任禹桐</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <div class="vignette"></div>
+
+  <nav class="nav">
+    <a class="nav-brand" href="/">
+      <span class="nav-brand-dot"></span>
+      <span data-profile="name">任禹桐</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">主页</a>
+      <a href="/projects">项目</a>
+      <a href="/about">关于我</a>
+      <a href="/reads">阅读</a>
+    </div>
+  </nav>
+
+  <main class="page admin-wrap">
+    <header class="section-head">
+      <p class="section-eyebrow">ADMIN</p>
+      <h1 class="section-title">后台管理</h1>
+      <p class="empty-hint" style="margin-top:10px">在这里管理项目与阅读内容，保存后前台即时生效。查看前台请访问 <a href="/" style="color:#5d8a9c">主页</a>。</p>
+    </header>
+
+    <!-- 登录门：未登录时显示 -->
+    <div class="login-gate" id="login-gate">
+      <h2>需要登录</h2>
+      <p class="sub">输入后台口令以继续管理</p>
+      <form id="login-form" autocomplete="off">
+        <div class="field">
+          <label>口令</label>
+          <input type="password" id="login-password" required placeholder="请输入后台口令">
+        </div>
+        <button type="submit" class="btn-submit" style="width:100%;margin-top:16px">进入后台</button>
+        <div class="login-err" id="login-err"></div>
+      </form>
+    </div>
+
+    <!-- 管理内容：登录后显示 -->
+    <div id="admin-content" style="display:none">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn-mini" data-act="logout">退出登录</button>
+      </div>
+
+      <!-- ============ 项目管理 ============ -->
+      <section class="admin-section">
+        <h2>项目管理</h2>
+        <p class="sub">新增 / 编辑 / 删除项目，保存后 <code>/projects</code> 页面自动生效。</p>
+
+        <form class="form-grid" id="form-project" autocomplete="off">
+          <input type="hidden" id="p-id">
+          <div class="field full"><label>项目名称</label><input id="p-title" required placeholder="例如：个人名片网站"></div>
+          <div class="field full"><label>项目描述</label><textarea id="p-desc" placeholder="用一两句话介绍这个项目"></textarea></div>
+          <div class="field"><label>标签（逗号分隔）</label><input id="p-tags" placeholder="Node.js, Canvas"></div>
+          <div class="field"><label>链接（可选）</label><input id="p-link" placeholder="https://github.com/..."></div>
+          <div class="form-actions full">
+            <button type="submit" class="btn-submit">新增项目</button>
+            <button type="button" class="btn-cancel" id="p-cancel" style="display:none">取消编辑</button>
+          </div>
+        </form>
+
+        <div class="admin-list" id="list-projects"></div>
+      </section>
+
+      <!-- ============ 阅读管理 ============ -->
+      <section class="admin-section">
+        <h2>阅读管理</h2>
+        <p class="sub">新增 / 编辑 / 删除书单与笔记，保存后 <code>/reads</code> 星图自动刷新。</p>
+
+        <form class="form-grid" id="form-read" autocomplete="off">
+          <input type="hidden" id="r-id">
+          <div class="field"><label>类型</label>
+            <select id="r-type">
+              <option value="book">书</option>
+              <option value="note">笔记</option>
+            </select>
+          </div>
+          <div class="field"><label>标题</label><input id="r-title" required placeholder="例如：三体"></div>
+          <div class="field"><label>知识象限（分类）</label><input id="r-category" placeholder="科技 / 历史 / 文学…"></div>
+          <div class="field"><label>状态</label><input id="r-status" placeholder="已读完 / 在读 / 笔记"></div>
+          <div class="field full"><label>简介 / 笔记内容</label><textarea id="r-note" placeholder="一句话简介或笔记要点"></textarea></div>
+          <div class="form-actions full">
+            <button type="submit" class="btn-submit">新增阅读</button>
+            <button type="button" class="btn-cancel" id="r-cancel" style="display:none">取消编辑</button>
+          </div>
+        </form>
+
+        <div class="admin-list" id="list-reads"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-contact" id="footer-contact">正在加载联系方式…</div>
+      <div class="footer-meta">© <span class="footer-year">2026</span> <span data-profile="name">任禹桐</span> · 星尘名片</div>
+    </div>
+  </footer>
+
+  <script src="/js/starfield.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

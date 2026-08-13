@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阅读 · 任禹桐</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <div class="vignette"></div>
+
+  <nav class="nav">
+    <a class="nav-brand" href="/">
+      <span class="nav-brand-dot"></span>
+      <span data-profile="name">任禹桐</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">主页</a>
+      <a href="/projects">项目</a>
+      <a href="/about">关于我</a>
+      <a href="/reads">阅读</a>
+    </div>
+  </nav>
+
+  <!-- 阅读页：径向圈层星图（首屏） -->
+  <main class="reads-stage">
+    <!-- 星图画布（原生 JS 绘制，中心 ME + 多层轨道 + 星体节点） -->
+    <canvas id="starmap"></canvas>
+
+    <!-- 左侧统计卡片 -->
+    <aside class="reads-side">
+      <div class="stat-card">
+        <div class="stat-label">书籍总数</div>
+        <div class="stat-value"><span id="stat-books">0</span><small>本</small></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">笔记数量</div>
+        <div class="stat-value"><span id="stat-notes">0</span><small>篇</small></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">知识象限</div>
+        <div class="stat-value"><span id="stat-cats">0</span></div>
+      </div>
+      <!-- 知识象限图例 -->
+      <div class="legend" id="legend"></div>
+    </aside>
+
+    <!-- 悬浮提示气泡（书名 + 简介） -->
+    <div class="starmap-tooltip" id="starmap-tooltip"></div>
+
+    <div class="reads-hint">悬浮星体 · 查看书名与简介</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-contact" id="footer-contact">正在加载联系方式…</div>
+      <div class="footer-meta">© <span class="footer-year">2026</span> <span data-profile="name">任禹桐</span> · 星尘名片</div>
+    </div>
+  </footer>
+
+  <script src="/js/starfield.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/starmap.js"></script>
+</body>
+</html>
