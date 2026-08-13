@@ -20,6 +20,16 @@ const express = require('express'); // Web 服务框架
 const path = require('path');       // 拼接文件路径
 const fs = require('fs');           // 读写本地 JSON 数据文件
 
+// 是否运行在 Vercel 无服务器环境（其文件系统只读）
+const IS_SERVERLESS = !!process.env.VERCEL;
+
+// 数据文件：Vercel 上用 require 打包读取（确保随代码一起部署）；本地仍走 fs 实时读写
+const BUNDLED_DATA = {
+  projects: require('./data/projects.json'),
+  reads: require('./data/reads.json'),
+  site: require('./data/site.json'),
+};
+
 // ---------- 2. 创建应用并设定端口 ----------
 const app = express();
 const PORT = process.env.PORT || 3000; // 默认端口 3000，可用环境变量覆盖
@@ -199,6 +209,14 @@ function writeJSON(file, data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
 }
 
+// 统一的数据读取入口：
+//   - Vercel 无服务器环境：返回打包好的只读数据
+//   - 本地：实时读取 JSON 文件，支持后台编辑
+function readData(type) {
+  if (IS_SERVERLESS) return BUNDLED_DATA[type];
+  return readJSON(FILES[type]);
+}
+
 // 生成一个唯一 id（时间戳 + 随机串，足够用于本地小站）
 function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -218,6 +236,12 @@ function requireAdmin(req, res, next) {
   return res.status(401).json({ message: '密码错误或缺失，无权限修改' });
 }
 
+// 只读保护：Vercel 无服务器环境文件系统只读，禁止后台增删改
+function writableOnly(req, res, next) {
+  if (IS_SERVERLESS) return res.status(403).json({ message: '只读模式：部署版不支持后台修改，请在本地编辑后重新部署' });
+  next();
+}
+
 // ---------- 7. 页面路由（严格规范） ----------
 // 用 sendFile 返回具体 HTML 页面，保证 /projects、/about 等路径能正确打开
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
@@ -229,22 +253,22 @@ app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'adm
 // ---------- 8. 站点信息接口 ----------
 // 前端主页 / 关于我页面读取此接口，修改 data/site.json 即可更新个人信息
 app.get('/api/site', (req, res) => {
-  res.json(readJSON(FILES.site));
+  res.json(readData('site'));
 });
 
 // ---------- 9. 项目 / 阅读 通用资源接口 ----------
 // 项目与阅读的数据结构一致，用工厂函数生成两套增删改查接口，避免重复代码
 function mountResource(type) {
   const file = FILES[type];
-  const list = () => readJSON(file); // 每次操作都实时读文件，保证后台修改立即生效
+  const list = () => readData(type); // 本地实时读文件；Vercel 读打包数据
 
   // 读取列表
   app.get(`/api/${type}`, (req, res) => {
     res.json(list());
   });
 
-  // 新增一条（需要管理密码）
-  app.post(`/api/${type}`, requireAdmin, (req, res) => {
+  // 新增一条（需要管理密码，且仅本地可写）
+  app.post(`/api/${type}`, requireAdmin, writableOnly, (req, res) => {
     const items = list();
     const item = Object.assign({ id: genId(), date: '' }, req.body || {});
     items.push(item);
@@ -252,8 +276,8 @@ function mountResource(type) {
     res.status(201).json(item); // 201 = 创建成功
   });
 
-  // 编辑一条（按 id 定位，需要管理密码）
-  app.put(`/api/${type}/:id`, requireAdmin, (req, res) => {
+  // 编辑一条（按 id 定位，需要管理密码，且仅本地可写）
+  app.put(`/api/${type}/:id`, requireAdmin, writableOnly, (req, res) => {
     const items = list();
     const idx = items.findIndex((it) => it.id === req.params.id);
     if (idx === -1) return res.status(404).json({ message: '未找到该记录' });
@@ -263,8 +287,8 @@ function mountResource(type) {
     res.json(items[idx]);
   });
 
-  // 删除一条（按 id 定位，需要管理密码）
-  app.delete(`/api/${type}/:id`, requireAdmin, (req, res) => {
+  // 删除一条（按 id 定位，需要管理密码，且仅本地可写）
+  app.delete(`/api/${type}/:id`, requireAdmin, writableOnly, (req, res) => {
     const items = list();
     const next = items.filter((it) => it.id !== req.params.id);
     if (next.length === items.length) return res.status(404).json({ message: '未找到该记录' });
@@ -282,16 +306,22 @@ app.use((req, res) => {
   res.status(404).json({ message: '接口不存在' });
 });
 
-// ---------- 11. 启动服务 ----------
-app.listen(PORT, () => {
-  console.log('==============================================');
-  console.log('  任禹桐 · 个人名片网站 已启动');
-  console.log('  请打开浏览器访问：http://localhost:' + PORT);
-  console.log('  后台管理地址：    http://localhost:' + PORT + '/admin');
-  if (process.env.ADMIN_PASSWORD) {
-    console.log('  后台管理密码：    已通过环境变量 ADMIN_PASSWORD 设置');
-  } else {
-    console.log('  后台管理密码：    ' + ADMIN_PASSWORD + '  （保存在 data/.admin-password）');
-  }
-  console.log('==============================================');
-});
+// ---------- 11. 导出与启动 ----------
+// 导出 app，供 Vercel 的 api/index.js 引入
+module.exports = app;
+
+// 仅当用 `node server.js` 直接运行时才监听端口；部署到 Vercel 时由平台托管，无需监听
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log('==============================================');
+    console.log('  任禹桐 · 个人名片网站 已启动');
+    console.log('  请打开浏览器访问：http://localhost:' + PORT);
+    console.log('  后台管理地址：    http://localhost:' + PORT + '/admin');
+    if (process.env.ADMIN_PASSWORD) {
+      console.log('  后台管理密码：    已通过环境变量 ADMIN_PASSWORD 设置');
+    } else {
+      console.log('  后台管理密码：    ' + ADMIN_PASSWORD + '  （保存在 data/.admin-password）');
+    }
+    console.log('==============================================');
+  });
+}

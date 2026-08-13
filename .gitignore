@@ -6,3 +6,6 @@ Thumbs.db
 
 # 本地自动生成的后台管理密码，绝不提交到 Git
 data/.admin-password
+
+# Vercel 本地部署工具目录
+.vercel/
