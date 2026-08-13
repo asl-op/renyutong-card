@@ -24,9 +24,33 @@ const fs = require('fs');           // 读写本地 JSON 数据文件
 const app = express();
 const PORT = process.env.PORT || 3000; // 默认端口 3000，可用环境变量覆盖
 
-// 后台管理密码：站点公开后用于保护「增删改」接口，防止他人篡改内容
-// 修改方式：设置环境变量 ADMIN_PASSWORD，或直接修改下面的默认值
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'asl11320';
+// ---------- 后台管理密码 ----------
+// 安全原则：密码绝不写入会被提交到 Git 的文件（避免推到 GitHub 后泄露）。
+// 优先级：
+//   1) 环境变量 ADMIN_PASSWORD（部署到 Render 时在控制台设置）
+//   2) 本地文件 data/.admin-password（首次运行自动生成随机密码并保存，已加入 .gitignore）
+const ADMIN_PASSWORD_FILE = path.join(__dirname, 'data', '.admin-password');
+
+function loadAdminPassword() {
+  // 环境变量优先（部署环境用）
+  if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
+  // 其次读取本地保存的密码
+  try {
+    if (fs.existsSync(ADMIN_PASSWORD_FILE)) {
+      const pwd = fs.readFileSync(ADMIN_PASSWORD_FILE, 'utf-8').trim();
+      if (pwd) return pwd;
+    }
+  } catch (e) { /* 忽略读取错误 */ }
+  // 都没有：生成随机密码并保存，供本地使用
+  const pwd = Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+  try {
+    fs.mkdirSync(path.dirname(ADMIN_PASSWORD_FILE), { recursive: true });
+    fs.writeFileSync(ADMIN_PASSWORD_FILE, pwd, 'utf-8');
+  } catch (e) { /* 写入失败则仅本次有效 */ }
+  return pwd;
+}
+
+const ADMIN_PASSWORD = loadAdminPassword();
 
 // ---------- 3. 数据文件路径配置 ----------
 const DATA_DIR = path.join(__dirname, 'data');     // 数据统一放在 data/ 目录下
@@ -264,5 +288,10 @@ app.listen(PORT, () => {
   console.log('  任禹桐 · 个人名片网站 已启动');
   console.log('  请打开浏览器访问：http://localhost:' + PORT);
   console.log('  后台管理地址：    http://localhost:' + PORT + '/admin');
+  if (process.env.ADMIN_PASSWORD) {
+    console.log('  后台管理密码：    已通过环境变量 ADMIN_PASSWORD 设置');
+  } else {
+    console.log('  后台管理密码：    ' + ADMIN_PASSWORD + '  （保存在 data/.admin-password）');
+  }
   console.log('==============================================');
 });

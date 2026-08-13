@@ -159,7 +159,7 @@ node server.js
 2. 双击 **`share.bat`**，脚本会自动建立隧道
 3. 控制台出现类似 `https://xxxx.serveousercontent.com` 的地址，复制发给任何人即可访问
 
-**后台管理密码**：默认 `asl11320`（在 `server.js` 的 `ADMIN_PASSWORD` 处修改）。通过公网也能访问 `/admin` 管理内容，写操作会要求输入此密码。
+**后台管理密码**：本地首次启动时自动生成随机密码，并在控制台打印（同时保存在 `data/.admin-password`，该文件已加入 `.gitignore`，不会提交）。部署到 Render 时，请在 Render 控制台的 Environment 里设置 `ADMIN_PASSWORD` 环境变量。
 
 **注意事项（重要）**：
 

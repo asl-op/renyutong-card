@@ -80,7 +80,7 @@ https://renyutong-card.onrender.com
 这就是你的永久链接，发给任何人都能打开。后台管理地址是：
 
 ```
-https://renyutong-card.onrender.com/admin   （管理密码默认 asl11320）
+https://renyutong-card.onrender.com/admin   （管理密码：需在 Render 后台 Environment 里设置 ADMIN_PASSWORD 环境变量）
 ```
 
 ---

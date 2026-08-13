@@ -2,7 +2,7 @@
  * admin.js —— 后台可视化管理
  * 功能：对「项目 / 阅读」内容进行新增、编辑、删除
  * 说明：保存后前端环形星轨会自动刷新渲染，无需改动任何前端代码
- * 安全：写操作需携带管理密码（默认 asl11320，见 server.js 的 ADMIN_PASSWORD）
+ * 安全：写操作需携带管理密码（由 server.js 生成/配置，密码不提交到 Git）
  */
 (function () {
   const listEl = document.getElementById('adminList');       // 列表容器
@@ -29,7 +29,7 @@
   let adminPass = sessionStorage.getItem('adminPass') || '';
   function getPass() {
     if (!adminPass) {
-      adminPass = prompt('请输入后台管理密码（默认 asl11320）：') || '';
+      adminPass = prompt('请输入后台管理密码：') || '';
       if (adminPass) sessionStorage.setItem('adminPass', adminPass);
     }
     return adminPass;

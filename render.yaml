@@ -1,5 +1,9 @@
 # Render 蓝图配置文件
 # 作用：在 Render 上「一键部署」时自动读取，免去手动填写
+#
+# 注意：后台管理密码（ADMIN_PASSWORD）请勿写在这个文件里，否则会被提交到 GitHub 泄露。
+#       部署完成后，到 Render 控制台 → 你的服务 → Environment → Add Environment Variable，
+#       添加 key=ADMIN_PASSWORD、value=你的密码 即可。
 services:
   - type: web            # 服务类型：Web 服务
     name: renyutong-card  # 服务名（会出现在网址里）
@@ -10,5 +14,3 @@ services:
     envVars:
       - key: NODE_VERSION # 指定 Node 版本
         value: "20"
-      - key: ADMIN_PASSWORD  # 后台管理密码（可改成你自己的）
-        value: "asl11320"

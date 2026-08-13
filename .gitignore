@@ -3,3 +3,6 @@ npm-debug.log*
 *.log
 .DS_Store
 Thumbs.db
+
+# 本地自动生成的后台管理密码，绝不提交到 Git
+data/.admin-password

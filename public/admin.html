@@ -69,7 +69,7 @@
 
     <p class="admin-tip">
       提示：新增 / 编辑 / 删除后，数据会立即写入 data 目录下的 JSON 文件，前端「项目」「阅读」页面的星轨会自动刷新渲染，无需改动任何前端代码。
-      写操作需要管理密码（默认 asl11320，可在 server.js 的 ADMIN_PASSWORD 处修改）。
+      写操作需要管理密码：本地首次启动自动生成（控制台会打印，保存在 data/.admin-password）；部署版在 Render 后台 Environment 里设置 ADMIN_PASSWORD。
     </p>
   </main>
 
