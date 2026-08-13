@@ -7,60 +7,34 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <canvas id="starfield"></canvas>
-  <div class="vignette"></div>
+  <!-- 全屏星云粒子背景画布 -->
+  <canvas id="nebula" class="nebula"></canvas>
 
-  <nav class="nav">
-    <a class="nav-brand" href="/">
-      <span class="nav-brand-dot"></span>
-      <span data-profile="name">任禹桐</span>
-    </a>
-    <div class="nav-links">
+  <!-- 顶部固定导航 -->
+  <header class="nav">
+    <nav class="nav-links">
       <a href="/">主页</a>
       <a href="/projects">项目</a>
       <a href="/about">关于我</a>
       <a href="/reads">阅读</a>
+    </nav>
+  </header>
+
+  <!-- 太阳系同心环形星轨页面 -->
+  <main class="orbit-page">
+    <div class="page-head">
+      <h2 class="page-title">阅读</h2>
+      <p class="page-desc">读书与随笔，是散落在轨道上的思想星尘 · 悬浮查看详情</p>
     </div>
-  </nav>
-
-  <!-- 阅读页：径向圈层星图（首屏） -->
-  <main class="reads-stage">
-    <!-- 星图画布（原生 JS 绘制，中心 ME + 多层轨道 + 星体节点） -->
-    <canvas id="starmap"></canvas>
-
-    <!-- 左侧统计卡片 -->
-    <aside class="reads-side">
-      <div class="stat-card">
-        <div class="stat-label">书籍总数</div>
-        <div class="stat-value"><span id="stat-books">0</span><small>本</small></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">笔记数量</div>
-        <div class="stat-value"><span id="stat-notes">0</span><small>篇</small></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">知识象限</div>
-        <div class="stat-value"><span id="stat-cats">0</span></div>
-      </div>
-      <!-- 知识象限图例 -->
-      <div class="legend" id="legend"></div>
-    </aside>
-
-    <!-- 悬浮提示气泡（书名 + 简介） -->
-    <div class="starmap-tooltip" id="starmap-tooltip"></div>
-
-    <div class="reads-hint">悬浮星体 · 查看书名与简介</div>
+    <!-- 星轨舞台：data-api 指定数据来源 -->
+    <div id="orbitStage" class="orbit-stage" data-api="/api/reads"></div>
   </main>
 
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-contact" id="footer-contact">正在加载联系方式…</div>
-      <div class="footer-meta">© <span class="footer-year">2026</span> <span data-profile="name">任禹桐</span> · 星尘名片</div>
-    </div>
-  </footer>
+  <!-- 悬浮详情卡片 -->
+  <div id="hoverCard" class="hover-card"></div>
 
-  <script src="/js/starfield.js"></script>
-  <script src="/js/common.js"></script>
-  <script src="/js/starmap.js"></script>
+  <script src="/js/nebula.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/orbit.js"></script>
 </body>
 </html>

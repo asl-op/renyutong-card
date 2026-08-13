@@ -7,43 +7,34 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <canvas id="starfield"></canvas>
-  <div class="vignette"></div>
+  <!-- 全屏星云粒子背景画布 -->
+  <canvas id="nebula" class="nebula"></canvas>
 
-  <nav class="nav">
-    <a class="nav-brand" href="/">
-      <span class="nav-brand-dot"></span>
-      <span data-profile="name">任禹桐</span>
-    </a>
-    <div class="nav-links">
+  <!-- 顶部固定导航 -->
+  <header class="nav">
+    <nav class="nav-links">
       <a href="/">主页</a>
       <a href="/projects">项目</a>
       <a href="/about">关于我</a>
       <a href="/reads">阅读</a>
-    </div>
-  </nav>
+    </nav>
+  </header>
 
-  <main class="page page-projects">
-    <header class="section-head">
-      <p class="section-eyebrow">PROJECTS</p>
-      <h1 class="section-title">项目</h1>
-    </header>
-
-    <!-- 项目卡片由 /api/projects 动态渲染 -->
-    <div class="projects-grid" id="projects-grid">
-      <p class="empty-hint">加载中…</p>
+  <!-- 太阳系同心环形星轨页面 -->
+  <main class="orbit-page">
+    <div class="page-head">
+      <h2 class="page-title">项目</h2>
+      <p class="page-desc">每个项目都是一颗绕我公转的行星 · 悬浮查看详情</p>
     </div>
+    <!-- 星轨舞台：data-api 指定数据来源 -->
+    <div id="orbitStage" class="orbit-stage" data-api="/api/projects"></div>
   </main>
 
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-contact" id="footer-contact">正在加载联系方式…</div>
-      <div class="footer-meta">© <span class="footer-year">2026</span> <span data-profile="name">任禹桐</span> · 星尘名片</div>
-    </div>
-  </footer>
+  <!-- 悬浮详情卡片 -->
+  <div id="hoverCard" class="hover-card"></div>
 
-  <script src="/js/starfield.js"></script>
-  <script src="/js/common.js"></script>
-  <script src="/js/projects.js"></script>
+  <script src="/js/nebula.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/orbit.js"></script>
 </body>
 </html>

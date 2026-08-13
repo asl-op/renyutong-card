@@ -1,61 +1,105 @@
-# 部署到公网 —— 获得可分享的链接
+# 永久部署教程（Render 免费版）
 
-本地 `http://localhost:3000/` 只有你自己的电脑能访问。想把网站分享给同学 / 老师，
-需要一个公网链接。下面是两种免费方案。
-
-> 好消息：`server.js` 已经用 `process.env.PORT` 读取端口，且 `package.json` 里有
-> `"start": "node server.js"`，所以部署到任何 Node 托管平台**都不需要改代码**。
-
----
-
-## 方案一：Glitch（推荐）
-
-**为什么选 Glitch**：免费、无需信用卡、原生支持 Node.js + Express，而且**项目文件会持久保存**，
-后台管理改动的 JSON 数据也能留存——最契合本项目「JSON 文件存储」的设计。
-
-### 第 1 步：把项目上传到 GitHub
-
-1. 用你的 GitHub 账号（asl-op）新建一个空仓库，例如叫 `renyutong-card`。
-2. 把整个 `renyutong-card` 文件夹传上去（保留目录结构：`server.js`、`package.json`、`data/`、`public/`）。
-   - 会用 git：命令行 `git init && git add . && git commit && git push`
-   - 不会 git：直接登录 GitHub 网页版，在仓库页点 **Uploading files**，把文件夹里的文件拖进去即可。
-
-### 第 2 步：在 Glitch 导入项目
-
-1. 打开 <https://glitch.com>，用 **Sign in with GitHub** 登录。
-2. 点 **New project → Import from GitHub**。
-3. 粘贴你的仓库地址，例如 `https://github.com/asl-op/renyutong-card`。
-4. Glitch 会自动识别 Node 项目、执行 `npm install`，并按 `package.json` 的 `start` 脚本启动服务。
-
-### 第 3 步：得到公开链接
-
-- 导入完成后，Glitch 会生成一个 `https://你的项目名.glitch.me` 的链接，**任何人打开都能看到你的网站**。
-- 免费版在长时间无人访问后会「休眠」，第一次打开要等几秒唤醒（属正常现象）。
-
-### 注意：公网版的后台管理
-
-- 公网版后台在 `https://你的项目名.glitch.me/admin`，**已加口令保护**，登录后才能增删改。
-- 默认口令是 `admin123`，**部署前务必修改**：在 Glitch 项目里点 **Tools → Environment Variables**，添加变量 `ADMIN_PASSWORD` 并设成你自己的强口令，然后重启项目。这样口令不会写进代码里。
-- 前台页面（主页 / 项目 / 关于我 / 阅读）仍是公开的，任何人无需登录即可浏览。
+> 目标：把网站部署到 Render，得到一个**永久固定、任何人都能打开**的网址，形如
+> `https://renyutong-card.onrender.com`（名字可在部署时自定义）。
+>
+> 前置：需要一个 GitHub 账号（你已有 `asl-op`）。全程免费、**无需信用卡**。
 
 ---
 
-## 方案二：Render（备选）
+## 总体流程
 
-1. 同样先把项目推到 GitHub。
-2. 打开 <https://render.com>，用 GitHub 登录。
-3. 点 **New → Web Service**，选择你的仓库。
-4. 构建命令填 `npm install`，启动命令填 `npm start`，选免费套餐，点 **Create Web Service**。
-5. 部署完成后得到一个 `https://xxx.onrender.com` 链接。
-
-> 区别：Render 免费版的磁盘是**临时的**，服务重启后，通过 admin 后台上改动的 JSON 会丢失
-> （但项目里自带的种子数据还在）。所以如果你主要用后台改内容，优先选 Glitch。
+1. 把本项目上传到 GitHub（下面第 1~4 步）
+2. 在 Render 上连接这个仓库并一键部署（第 5~8 步）
+3. 得到永久网址
 
 ---
 
-## 小结
+## 第 1 步：登录 GitHub
 
-| 平台 | 链接 | 数据持久 | 适合 |
-|------|------|---------|------|
-| Glitch | `https://xxx.glitch.me` | ✅ 持久 | 首选，支持后台管理 |
-| Render | `https://xxx.onrender.com` | ⚠️ 临时 | 只读展示 |
+打开 https://github.com 登录你的账号 `asl-op`。
+（如果你当前的网络打不开 GitHub，见文末「网络提示」。）
+
+## 第 2 步：新建一个仓库
+
+1. 点右上角 `+` → **New repository**
+2. 仓库名填 `renyutong-card`（或任意名字）
+3. 选 **Public**（公开，免费）
+4. **不要**勾选任何初始化选项（README / .gitignore 都不要勾）
+5. 点 **Create repository**
+
+## 第 3 步：上传代码
+
+新仓库创建后，GitHub 会显示一个「push an existing repository」的说明，里面有一段命令。
+在**本项目文件夹**（`renyutong-card`）打开命令行，依次执行：
+
+```bash
+# 1) 关联远程仓库（把下面地址换成你的仓库地址）
+git remote add origin https://github.com/asl-op/renyutong-card.git
+
+# 2) 推送代码
+git push -u origin main
+```
+
+> 本文件夹我已经帮你 `git init` 并做好了首次提交，直接执行上面两条即可。
+> 如果提示分支名不是 main，可用 `git branch -M main` 先重命名。
+
+> 提示：第一次 push 时 GitHub 会要求登录验证，按提示输入账号密码或 Personal Access Token。
+
+## 第 4 步：注册 Render
+
+打开 https://render.com → 点 **Get Started** → 用 **GitHub 账号**登录（Sign in with GitHub），
+并授权 Render 访问你的仓库。
+
+## 第 5 步：部署
+
+**方式 A —— 用蓝图一键部署（推荐）**
+
+1. 登录后进入 Render 控制台，点 **New +** → **Blueprint**
+2. 选择你的 `renyutong-card` 仓库
+3. Render 会自动读取项目里的 `render.yaml`，点 **Apply** / **Create**
+4. 等几分钟，状态变 **Live** 即部署完成
+
+**方式 B —— 手动创建 Web Service**
+
+1. 点 **New +** → **Web Service**
+2. 选择仓库 `renyutong-card`
+3. 名称、区域默认即可；**Environment** 选 **Node**
+4. Build Command 填 `npm install`，Start Command 填 `node server.js`
+5. 方案选 **Free**，点 **Create Web Service**
+6. 等状态变 **Live**
+
+## 第 6 步：得到永久网址
+
+部署完成后，控制台顶部会显示网址，例如：
+
+```
+https://renyutong-card.onrender.com
+```
+
+这就是你的永久链接，发给任何人都能打开。后台管理地址是：
+
+```
+https://renyutong-card.onrender.com/admin   （管理密码默认 asl11320）
+```
+
+---
+
+## 注意事项（重要）
+
+1. **免费版会休眠**：Render 免费版在约 15 分钟无访问后自动休眠，第一次打开需要等 **30~60 秒**唤醒，之后正常。这是免费方案的通病，介意可升级付费。
+2. **后台修改不持久**：免费版磁盘是临时的，部署版上通过 `/admin` 做的修改，在**重新部署或重启后会还原**为仓库里的内容。
+   - 想永久改内容：在本地改好 `data/*.json` → `git push` → Render 自动重新部署。
+   - 本地（`start.bat`）运行不受影响，后台修改会正常保存到本地文件。
+3. **自定义域名**（可选）：可在 Render 设置里绑定自己的域名，但国内域名需要 ICP 备案。
+
+---
+
+## 网络提示（重要）
+
+国内直连 `github.com` / `render.com` 经常不稳定或超时。如果你遇到打不开的情况：
+
+- **换网络**：用校园网、手机热点（4G/5G）、或挂代理/VPN 再操作
+- 或者告诉我，我改用 **Glitch** 方案（无需 GitHub、在网页里粘贴文件即可部署，但免费版也有休眠）
+
+需要我协助时，把你在哪一步卡住了告诉我即可。

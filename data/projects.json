@@ -1,35 +1,63 @@
 [
   {
-    "id": "p-1",
+    "id": "prj-1001",
     "title": "个人名片网站",
-    "description": "极简高级宇宙星系质感的个人名片网站：Node.js + Express 后端，原生 JS 手写星云粒子与径向星图。",
+    "summary": "你正在浏览的这个站点：宇宙星轨主题，原生 JS 星云与太阳系同心轨道。",
+    "category": "Web 开发",
+    "link": "https://github.com/asl-op",
     "tags": [
       "Node.js",
       "Express",
-      "Canvas"
+      "原生 JS"
     ],
+    "date": "2026-08"
+  },
+  {
+    "id": "prj-1002",
+    "title": "星云粒子系统",
+    "summary": "基于 Canvas 的粒子星云背景，含缓慢漂移、视差与鼠标引力扰动。",
+    "category": "Web 开发",
     "link": "https://github.com/asl-op",
-    "createdAt": "2026-08-13"
+    "tags": [
+      "Canvas",
+      "动画"
+    ],
+    "date": "2026-07"
   },
   {
-    "id": "p-2",
-    "title": "示例项目二",
-    "description": "这是一个演示卡片，可在后台管理页新增、编辑或删除。",
+    "id": "prj-1003",
+    "title": "算法刷题笔记",
+    "summary": "数据结构与算法题解整理，持续更新的个人学习仓库。",
+    "category": "算法学习",
+    "link": "https://github.com/asl-op",
     "tags": [
-      "JavaScript"
+      "算法",
+      "LeetCode"
     ],
-    "link": "",
-    "createdAt": "2026-08-13"
+    "date": "2026-06"
   },
   {
-    "id": "p-3",
-    "title": "示例项目三",
-    "description": "轻量化、不使用重型前端框架，保持纯粹的原生手写实现。",
+    "id": "prj-1004",
+    "title": "GitHub 开源小工具集",
+    "summary": "自己写的一些命令行与日常小工具，开源在 GitHub 上。",
+    "category": "开源项目",
+    "link": "https://github.com/asl-op",
     "tags": [
-      "HTML / CSS",
-      "Design"
+      "开源",
+      "工具"
     ],
-    "link": "",
-    "createdAt": "2026-08-13"
+    "date": "2026-05"
+  },
+  {
+    "id": "prj-1005",
+    "title": "学习笔记知识库",
+    "summary": "用 Markdown 整理的各门课程与读书心得，本地可检索。",
+    "category": "开源项目",
+    "link": "https://github.com/asl-op",
+    "tags": [
+      "Markdown",
+      "笔记"
+    ],
+    "date": "2026-04"
   }
 ]

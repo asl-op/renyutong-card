@@ -1,19 +1,47 @@
 [
-  { "id": "r-1", "type": "book", "title": "人类简史", "category": "历史", "status": "已读完", "note": "从认知革命到科学革命，重读人类如何成为地球的主宰。" },
-  { "id": "r-2", "type": "book", "title": "万历十五年", "category": "历史", "status": "在读", "note": "一个普通年份里，藏着明帝国走向衰亡的种种征兆。" },
-  { "id": "r-3", "type": "book", "title": "代码整洁之道", "category": "科技", "status": "在读", "note": "关于如何写出可读、可维护代码的经典之书。" },
-  { "id": "r-4", "type": "book", "title": "深入理解计算机系统", "category": "科技", "status": "已读完", "note": "从底层看程序如何运行，夯实计算机根基。" },
-  { "id": "r-5", "type": "note", "title": "费曼学习法笔记", "category": "学习", "status": "笔记", "note": "以教代学：能把一个概念讲给外行听懂，才算真正掌握。" },
-  { "id": "r-6", "type": "book", "title": "刻意练习", "category": "学习", "status": "已读完", "note": "天才不是天生的，一万小时背后的方法论。" },
-  { "id": "r-7", "type": "book", "title": "如何阅读一本书", "category": "学习", "status": "在读", "note": "阅读分层次，主动阅读者才能与作者真正对话。" },
-  { "id": "r-8", "type": "book", "title": "学习之道", "category": "学习", "status": "已读完", "note": "专注与发散交替，才是高效学习的秘密。" },
-  { "id": "r-9", "type": "book", "title": "三体", "category": "科幻", "status": "已读完", "note": "宇宙尺度的想象力，黑暗森林法则让人不寒而栗。" },
-  { "id": "r-10", "type": "note", "title": "银河系认知笔记", "category": "科幻", "status": "笔记", "note": "我们抬头看到的星光，是数万年前出发的光。" },
-  { "id": "r-11", "type": "book", "title": "球状闪电", "category": "科幻", "status": "已读完", "note": "刘慈欣笔下另一种浪漫而残酷的物理幻想。" },
-  { "id": "r-12", "type": "book", "title": "你一生的故事", "category": "科幻", "status": "在读", "note": "当已知结局，是否还会选择同样的开始？" },
-  { "id": "r-13", "type": "book", "title": "小王子", "category": "文学", "status": "已读完", "note": "每个大人都曾经是孩子，只是很少有人记得。" },
-  { "id": "r-14", "type": "book", "title": "百年孤独", "category": "文学", "status": "在读", "note": "布恩迪亚家族七代人的孤独史诗。" },
-  { "id": "r-15", "type": "note", "title": "设计中的克制", "category": "设计", "status": "笔记", "note": "高级感来自克制：少即是多，留白比堆砌更有力量。" },
-  { "id": "r-16", "type": "book", "title": "写给大家看的设计书", "category": "设计", "status": "已读完", "note": "亲密性、对齐、重复、对比，设计的四大基本原则。" },
-  { "id": "r-17", "type": "book", "title": "苏菲的世界", "category": "哲学", "status": "在读", "note": "一本用小说串起西方哲学史的启蒙读物。" }
+  {
+    "id": "rd-1001",
+    "title": "《代码整洁之道》笔记",
+    "summary": "关于命名、函数与重构的读后整理：代码是写给人看的。",
+    "category": "技术",
+    "link": "",
+    "tags": ["工程", "重构"],
+    "date": "2026-07"
+  },
+  {
+    "id": "rd-1002",
+    "title": "《人类简史》读书随笔",
+    "summary": "从认知革命到科学革命，重新理解人类协作的想象共同体。",
+    "category": "社科",
+    "link": "",
+    "tags": ["历史", "认知"],
+    "date": "2026-06"
+  },
+  {
+    "id": "rd-1003",
+    "title": "《三体》读后感",
+    "summary": "黑暗森林法则与宇宙社会学，科幻外壳下的人性思考。",
+    "category": "科幻",
+    "link": "",
+    "tags": ["科幻", "刘慈欣"],
+    "date": "2026-05"
+  },
+  {
+    "id": "rd-1004",
+    "title": "关于宇宙与自我",
+    "summary": "仰望星空时的零散随笔：我们只是星尘，却会思考宇宙。",
+    "category": "随笔",
+    "link": "",
+    "tags": ["随笔", "宇宙"],
+    "date": "2026-04"
+  },
+  {
+    "id": "rd-1005",
+    "title": "《深入理解计算机系统》摘录",
+    "summary": "CSAPP 关键章节笔记：从位运算到存储层次。",
+    "category": "技术",
+    "link": "",
+    "tags": ["计算机", "CSAPP"],
+    "date": "2026-03"
+  }
 ]

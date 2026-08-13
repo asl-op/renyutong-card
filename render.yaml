@@ -1,0 +1,14 @@
+# Render 蓝图配置文件
+# 作用：在 Render 上「一键部署」时自动读取，免去手动填写
+services:
+  - type: web            # 服务类型：Web 服务
+    name: renyutong-card  # 服务名（会出现在网址里）
+    runtime: node         # 运行环境：Node.js
+    plan: free            # 免费方案
+    buildCommand: npm install   # 构建命令：安装依赖
+    startCommand: node server.js # 启动命令
+    envVars:
+      - key: NODE_VERSION # 指定 Node 版本
+        value: "20"
+      - key: ADMIN_PASSWORD  # 后台管理密码（可改成你自己的）
+        value: "asl11320"

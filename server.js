@@ -1,308 +1,268 @@
 /**
- * ============================================================
- *  任禹桐 · 个人名片网站 —— 后端主服务
- * ------------------------------------------------------------
- *  技术栈：Node.js + Express
- *  存储：轻量 JSON 文件（data/ 目录），无需额外数据库，新手友好
+ * ================================================================
+ *  server.js —— 任禹桐「动态个人名片网站」后端主程序
+ *  技术栈：Node.js + Express + 轻量 JSON 文件存储（无需数据库）
  *
- *  页面路由：
- *      GET  /            主页
- *      GET  /projects    项目页
- *      GET  /about       关于我
- *      GET  /reads       阅读页（径向圈层星图）
- *      GET  /admin       后台可视化管理（增删改项目 / 阅读）
+ *  启动方式：双击 start.bat，或在命令行运行 `node server.js`
+ *  访问地址：http://localhost:3000
  *
- *  数据接口：
- *      GET  /api/profile        读取个人资料
- *      GET  /api/projects       读取项目列表
- *      POST /api/projects       新增项目
- *      PUT  /api/projects/:id   修改项目
- *      DELETE /api/projects/:id 删除项目
- *      （阅读 /api/reads 同理：GET / POST / PUT / DELETE）
- *
- *  说明：本项目不引入数据库，所有数据都以 JSON 文本形式
- *        存放在 data/ 目录下，直接用记事本打开也能编辑。
- * ============================================================
+ *  路由规范：
+ *     /           主页
+ *     /projects   项目
+ *     /about      关于我
+ *     /reads      阅读
+ *     /admin      后台可视化管理
+ * ================================================================
  */
 
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const crypto = require('crypto');
+// ---------- 1. 引入依赖 ----------
+const express = require('express'); // Web 服务框架
+const path = require('path');       // 拼接文件路径
+const fs = require('fs');           // 读写本地 JSON 数据文件
 
+// ---------- 2. 创建应用并设定端口 ----------
 const app = express();
-const PORT = process.env.PORT || 3000; // 端口号，可用环境变量覆盖
+const PORT = process.env.PORT || 3000; // 默认端口 3000，可用环境变量覆盖
 
-/* ---------- 后台访问口令（简单密码保护） ---------- */
+// 后台管理密码：站点公开后用于保护「增删改」接口，防止他人篡改内容
+// 修改方式：设置环境变量 ADMIN_PASSWORD，或直接修改下面的默认值
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'asl11320';
 
-// 后台口令：优先读环境变量 ADMIN_PASSWORD（部署到 Glitch/Render 时在平台设置），
-// 本地未设置时默认 admin123。请改成你自己的口令，尤其是部署到公网前！
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-
-// 用口令算出一个固定令牌（HMAC）。登录成功后，服务器把令牌写入 httpOnly Cookie，
-// 之后的写操作（新增 / 编辑 / 删除）都会校验这个令牌。
-const ADMIN_TOKEN = crypto.createHmac('sha256', 'renyutong-card-salt').update(ADMIN_PASSWORD).digest('hex');
-
-/* ---------- 1. 基础中间件 ---------- */
-
-// 解析 application/json 请求体：后台新增/编辑时提交的数据用 JSON 传输
-app.use(express.json());
-
-// 托管 public 目录下的静态资源（css / js），前端页面直接引用
-app.use(express.static(path.join(__dirname, 'public')));
-
-/* ---------- 2. 数据文件路径 ---------- */
-
-const DATA_DIR = path.join(__dirname, 'data');
+// ---------- 3. 数据文件路径配置 ----------
+const DATA_DIR = path.join(__dirname, 'data');     // 数据统一放在 data/ 目录下
 const FILES = {
-  profile: path.join(DATA_DIR, 'profile.json'),
-  projects: path.join(DATA_DIR, 'projects.json'),
-  reads: path.join(DATA_DIR, 'reads.json'),
+  projects: path.join(DATA_DIR, 'projects.json'),  // 项目数据
+  reads:    path.join(DATA_DIR, 'reads.json'),     // 阅读数据
+  site:     path.join(DATA_DIR, 'site.json'),      // 站点 / 个人信息
 };
 
-/* ---------- 3. 种子数据（首次运行时若文件缺失则写入） ---------- */
-
-const DEFAULT_PROFILE = {
-  name: '任禹桐',
-  nameEn: 'REN YUTONG',
-  title: '学生 · 开发者 · 终身学习者',
-  intro: '在代码与文字之间，探索世界的秩序与美。',
-  about:
-    '你好，我是任禹桐。\n' +
-    '热爱编程、阅读与设计，喜欢把复杂的事情拆解成简单优雅的解决方案。\n' +
-    '这个网站是一张会呼吸的星空名片，记录我的项目、阅读与思考。\n' +
-    '欢迎你来到这里，也欢迎与我交流。',
-  skills: ['Node.js', 'JavaScript', 'HTML / CSS', 'Python', 'UI 设计'],
-  contact: {
-    emails: ['d.gloss.ad@gmail.com', '3867731709@qq.com'],
+// ---------- 4. 首次运行的默认数据（文件不存在时自动生成） ----------
+const DEFAULTS = {
+  projects: [
+    {
+      id: 'prj-1001',
+      title: '个人名片网站',
+      summary: '你正在浏览的这个站点：宇宙星轨主题，原生 JS 星云与太阳系同心轨道。',
+      category: 'Web 开发',
+      link: 'https://github.com/asl-op',
+      tags: ['Node.js', 'Express', '原生 JS'],
+      date: '2026-08',
+    },
+    {
+      id: 'prj-1002',
+      title: '星云粒子系统',
+      summary: '基于 Canvas 的粒子星云背景，含缓慢漂移、视差与鼠标引力扰动。',
+      category: 'Web 开发',
+      link: 'https://github.com/asl-op',
+      tags: ['Canvas', '动画'],
+      date: '2026-07',
+    },
+    {
+      id: 'prj-1003',
+      title: '算法刷题笔记',
+      summary: '数据结构与算法题解整理，持续更新的个人学习仓库。',
+      category: '算法学习',
+      link: 'https://github.com/asl-op',
+      tags: ['算法', 'LeetCode'],
+      date: '2026-06',
+    },
+    {
+      id: 'prj-1004',
+      title: 'GitHub 开源小工具集',
+      summary: '自己写的一些命令行与日常小工具，开源在 GitHub 上。',
+      category: '开源项目',
+      link: 'https://github.com/asl-op',
+      tags: ['开源', '工具'],
+      date: '2026-05',
+    },
+    {
+      id: 'prj-1005',
+      title: '学习笔记知识库',
+      summary: '用 Markdown 整理的各门课程与读书心得，本地可检索。',
+      category: '开源项目',
+      link: 'https://github.com/asl-op',
+      tags: ['Markdown', '笔记'],
+      date: '2026-04',
+    },
+  ],
+  reads: [
+    {
+      id: 'rd-1001',
+      title: '《代码整洁之道》笔记',
+      summary: '关于命名、函数与重构的读后整理：代码是写给人看的。',
+      category: '技术',
+      link: '',
+      tags: ['工程', '重构'],
+      date: '2026-07',
+    },
+    {
+      id: 'rd-1002',
+      title: '《人类简史》读书随笔',
+      summary: '从认知革命到科学革命，重新理解人类协作的想象共同体。',
+      category: '社科',
+      link: '',
+      tags: ['历史', '认知'],
+      date: '2026-06',
+    },
+    {
+      id: 'rd-1003',
+      title: '《三体》读后感',
+      summary: '黑暗森林法则与宇宙社会学，科幻外壳下的人性思考。',
+      category: '科幻',
+      link: '',
+      tags: ['科幻', '刘慈欣'],
+      date: '2026-05',
+    },
+    {
+      id: 'rd-1004',
+      title: '关于宇宙与自我',
+      summary: '仰望星空时的零散随笔：我们只是星尘，却会思考宇宙。',
+      category: '随笔',
+      link: '',
+      tags: ['随笔', '宇宙'],
+      date: '2026-04',
+    },
+    {
+      id: 'rd-1005',
+      title: '《深入理解计算机系统》摘录',
+      summary: 'CSAPP 关键章节笔记：从位运算到存储层次。',
+      category: '技术',
+      link: '',
+      tags: ['计算机', 'CSAPP'],
+      date: '2026-03',
+    },
+  ],
+  site: {
+    name: '任禹桐',
+    englishName: 'Ren Yutong',
+    tagline: '学生 · 开发者 · 终身学习者',
+    intro: '在代码与文字之间，探索世界的秩序与美。',
+    bio: '你好，我是任禹桐。\n热爱编程、阅读与设计，喜欢把复杂的事情拆解成简单优雅的解决方案。\n这个网站是一张会呼吸的星空名片，记录我的项目、阅读与思考。\n欢迎你来到这里，也欢迎与我交流。',
+    skills: ['Node.js', 'JavaScript', 'HTML / CSS', 'Python', 'UI 设计'],
+    email: 'd.gloss.ad@gmail.com',
+    email2: '3867731709@qq.com',
     github: 'https://github.com/asl-op',
+    githubUser: 'asl-op',
     wechat: 'ASL11320',
     qq: '3867731709',
-    blog: '',
   },
 };
 
-const DEFAULT_PROJECTS = [
-  {
-    id: 'p-1',
-    title: '个人名片网站',
-    description:
-      '极简高级宇宙星系质感的个人名片网站：Node.js + Express 后端，原生 JS 手写星云粒子与径向星图。',
-    tags: ['Node.js', 'Express', 'Canvas'],
-    link: 'https://github.com/asl-op',
-    createdAt: '2026-08-13',
-  },
-  {
-    id: 'p-2',
-    title: '示例项目二',
-    description: '这是一个演示卡片，可在后台管理页新增、编辑或删除。',
-    tags: ['JavaScript'],
-    link: '',
-    createdAt: '2026-08-13',
-  },
-  {
-    id: 'p-3',
-    title: '示例项目三',
-    description: '轻量化、不使用重型前端框架，保持纯粹的原生手写实现。',
-    tags: ['HTML / CSS', 'Design'],
-    link: '',
-    createdAt: '2026-08-13',
-  },
-];
+// ---------- 5. 数据读写工具函数 ----------
 
-const DEFAULT_READS = [
-  { id: 'r-1', type: 'book', title: '人类简史', category: '历史', status: '已读完', note: '从认知革命到科学革命，重读人类如何成为地球的主宰。' },
-  { id: 'r-2', type: 'book', title: '代码整洁之道', category: '科技', status: '在读', note: '关于如何写出可读、可维护代码的经典之书。' },
-  { id: 'r-3', type: 'note', title: '费曼学习法笔记', category: '学习', status: '笔记', note: '以教代学：能把一个概念讲给外行听懂，才算真正掌握。' },
-  { id: 'r-4', type: 'book', title: '三体', category: '科幻', status: '已读完', note: '宇宙尺度的想象力，黑暗森林法则让人不寒而栗。' },
-  { id: 'r-5', type: 'book', title: '小王子', category: '文学', status: '已读完', note: '每个大人都曾经是孩子，只是很少有人记得。' },
-  { id: 'r-6', type: 'note', title: '设计中的克制', category: '设计', status: '笔记', note: '高级感来自克制：少即是多，留白比堆砌更有力量。' },
-  { id: 'r-7', type: 'book', title: '苏菲的世界', category: '哲学', status: '在读', note: '一本用小说串起西方哲学史的启蒙读物。' },
-  { id: 'r-8', type: 'book', title: '刻意练习', category: '学习', status: '已读完', note: '天才不是天生的，一万小时背后的方法论。' },
-  { id: 'r-9', type: 'note', title: '银河系认知笔记', category: '科幻', status: '笔记', note: '我们抬头看到的星光，是数万年前出发的光。' },
-];
+// 确保数据文件存在：不存在则用默认数据创建（不会覆盖已有文件）
+function ensureData() {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  Object.keys(FILES).forEach((key) => {
+    if (!fs.existsSync(FILES[key])) {
+      writeJSON(FILES[key], DEFAULTS[key]);
+    }
+  });
+}
 
-/* ---------- 4. 工具函数：JSON 文件读写 ---------- */
-
-// 读取 JSON 文件并解析；文件不存在或内容非法时返回 fallback（避免程序崩溃）
-function readJSON(file, fallback) {
+// 读取 JSON 文件 → 返回 JS 对象/数组（读失败时返回空数组，避免程序崩溃）
+function readJSON(file) {
   try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch (err) {
-    return fallback;
+    const raw = fs.readFileSync(file, 'utf-8');
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
   }
 }
 
-// 把数据写入 JSON 文件（缩进 2 空格，方便直接打开文件查看/编辑）
+// 把 JS 对象/数组写入 JSON 文件（格式化缩进，方便人工查看与编辑）
 function writeJSON(file, data) {
-  fs.mkdirSync(DATA_DIR, { recursive: true }); // 确保 data 目录存在
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-// 生成唯一 id（Node 14+ 内置的 crypto.randomUUID，无需额外依赖）
+// 生成一个唯一 id（时间戳 + 随机串，足够用于本地小站）
 function genId() {
-  return crypto.randomUUID();
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-/* ---------- 后台鉴权：读取 Cookie / 校验令牌 ---------- */
+// 初始化数据文件
+ensureData();
 
-// 手动从请求头解析 admin_token（避免引入 cookie-parser 依赖）
-function getToken(req) {
-  const header = req.headers.cookie || '';
-  const pair = header.split(';').map((s) => s.trim()).find((s) => s.startsWith('admin_token='));
-  return pair ? pair.slice('admin_token='.length) : '';
-}
+// ---------- 6. 中间件 ----------
+app.use(express.json());                                   // 解析请求体中的 JSON
+app.use(express.static(path.join(__dirname, 'public')));   // 托管前端静态资源（css/js/html）
 
-// 写操作鉴权中间件：未携带正确令牌一律返回 401
+// 后台鉴权中间件：校验请求头中的 x-admin-password
+// 只保护「新增/编辑/删除」，读取接口保持公开，方便任何人浏览
 function requireAdmin(req, res, next) {
-  if (getToken(req) === ADMIN_TOKEN) return next();
-  res.status(401).json({ error: '未授权：请先在 /admin 登录' });
+  if (req.get('x-admin-password') === ADMIN_PASSWORD) return next();
+  return res.status(401).json({ message: '密码错误或缺失，无权限修改' });
 }
 
-/* ---------- 5. 通用 CRUD 路由注册 ---------- */
+// ---------- 7. 页面路由（严格规范） ----------
+// 用 sendFile 返回具体 HTML 页面，保证 /projects、/about 等路径能正确打开
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/projects', (req, res) => res.sendFile(path.join(__dirname, 'public', 'projects.html')));
+app.get('/about', (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
+app.get('/reads', (req, res) => res.sendFile(path.join(__dirname, 'public', 'reads.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
-/**
- * 为「项目」和「阅读」两个集合注册相同结构的增删改查接口，
- * 避免重复代码。base 形如 '/api/projects'，file 为对应 JSON 文件。
- */
-function collectionRoutes(base, file, defaults) {
-  // 首次运行时文件可能不存在，先写入种子数据
-  if (!fs.existsSync(file)) {
-    writeJSON(file, defaults);
-  }
+// ---------- 8. 站点信息接口 ----------
+// 前端主页 / 关于我页面读取此接口，修改 data/site.json 即可更新个人信息
+app.get('/api/site', (req, res) => {
+  res.json(readJSON(FILES.site));
+});
+
+// ---------- 9. 项目 / 阅读 通用资源接口 ----------
+// 项目与阅读的数据结构一致，用工厂函数生成两套增删改查接口，避免重复代码
+function mountResource(type) {
+  const file = FILES[type];
+  const list = () => readJSON(file); // 每次操作都实时读文件，保证后台修改立即生效
 
   // 读取列表
-  app.get(base, (req, res) => {
-    res.json(readJSON(file, defaults));
+  app.get(`/api/${type}`, (req, res) => {
+    res.json(list());
   });
 
-  // 新增一条（需登录）
-  app.post(base, requireAdmin, (req, res) => {
-    const list = readJSON(file, defaults);
-    const item = Object.assign(
-      { id: genId(), createdAt: new Date().toISOString().slice(0, 10) },
-      req.body // 后台提交的字段（title / description / category ...）
-    );
-    list.push(item);
-    writeJSON(file, list);
-    res.json(item); // 返回新增的完整记录（含生成的 id）
+  // 新增一条（需要管理密码）
+  app.post(`/api/${type}`, requireAdmin, (req, res) => {
+    const items = list();
+    const item = Object.assign({ id: genId(), date: '' }, req.body || {});
+    items.push(item);
+    writeJSON(file, items);
+    res.status(201).json(item); // 201 = 创建成功
   });
 
-  // 修改一条（按 id 定位，需登录）
-  app.put(base + '/:id', requireAdmin, (req, res) => {
-    const list = readJSON(file, defaults);
-    const idx = list.findIndex((it) => it.id === req.params.id);
-    if (idx === -1) {
-      return res.status(404).json({ error: '未找到该记录' });
-    }
-    // 合并：保留原 id 与 createdAt，覆盖其余字段
-    list[idx] = Object.assign({}, list[idx], req.body, { id: list[idx].id });
-    writeJSON(file, list);
-    res.json(list[idx]);
+  // 编辑一条（按 id 定位，需要管理密码）
+  app.put(`/api/${type}/:id`, requireAdmin, (req, res) => {
+    const items = list();
+    const idx = items.findIndex((it) => it.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ message: '未找到该记录' });
+    // 保留原 id，用请求体覆盖其余字段
+    items[idx] = Object.assign({}, items[idx], req.body || {}, { id: req.params.id });
+    writeJSON(file, items);
+    res.json(items[idx]);
   });
 
-  // 删除一条（按 id 定位，需登录）
-  app.delete(base + '/:id', requireAdmin, (req, res) => {
-    const list = readJSON(file, defaults);
-    const next = list.filter((it) => it.id !== req.params.id);
+  // 删除一条（按 id 定位，需要管理密码）
+  app.delete(`/api/${type}/:id`, requireAdmin, (req, res) => {
+    const items = list();
+    const next = items.filter((it) => it.id !== req.params.id);
+    if (next.length === items.length) return res.status(404).json({ message: '未找到该记录' });
     writeJSON(file, next);
     res.json({ ok: true });
   });
 }
 
-// 注册两个集合的路由
-collectionRoutes('/api/projects', FILES.projects, DEFAULT_PROJECTS);
-collectionRoutes('/api/reads', FILES.reads, DEFAULT_READS);
+// 挂载两套接口：/api/projects 和 /api/reads
+mountResource('projects');
+mountResource('reads');
 
-/* ---------- 6. 个人资料接口（只读，供前端动态填充姓名/简介/页脚） ---------- */
-
-app.get('/api/profile', (req, res) => {
-  if (!fs.existsSync(FILES.profile)) {
-    writeJSON(FILES.profile, DEFAULT_PROFILE);
-  }
-  res.json(readJSON(FILES.profile, DEFAULT_PROFILE));
-});
-
-/* ---------- 后台登录 / 登出 / 状态接口 ---------- */
-
-// 登录：口令正确则下发 httpOnly Cookie（7 天有效）
-app.post('/api/login', (req, res) => {
-  const password = (req.body && req.body.password) || '';
-  if (password === ADMIN_PASSWORD) {
-    res.cookie('admin_token', ADMIN_TOKEN, {
-      httpOnly: true,             // 仅服务器可读，JS 拿不到，防 XSS 窃取
-      sameSite: 'lax',            // 阻止跨站请求携带，降低 CSRF 风险
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 天
-    });
-    return res.json({ ok: true });
-  }
-  res.status(401).json({ ok: false, error: '口令错误' });
-});
-
-// 登出：清除 Cookie
-app.post('/api/logout', (req, res) => {
-  res.clearCookie('admin_token');
-  res.json({ ok: true });
-});
-
-// 查询当前是否已登录（供 admin 页判断显示登录表单还是管理界面）
-app.get('/api/auth', (req, res) => {
-  res.json({ authed: getToken(req) === ADMIN_TOKEN });
-});
-
-/* ---------- 7. 页面路由 ---------- */
-
-// 路径 -> 对应 HTML 文件，显式声明让路由一目了然
-const PAGES = {
-  '/': 'index.html',
-  '/projects': 'projects.html',
-  '/about': 'about.html',
-  '/reads': 'reads.html',
-  '/admin': 'admin.html',
-};
-
-for (const [route, file] of Object.entries(PAGES)) {
-  app.get(route, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', file));
-  });
-}
-
-/* ---------- 8. 兜底：404 与错误处理 ---------- */
-
-// 未匹配到任何路由时返回 404
+// ---------- 10. 404 兜底 ----------
 app.use((req, res) => {
-  res.status(404).send('404 · 页面不存在，请检查地址');
+  res.status(404).json({ message: '接口不存在' });
 });
 
-// 全局错误处理（4 个参数缺一不可，Express 以此识别错误中间件）
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: '服务器内部错误' });
-});
-
-/* ---------- 9. 启动服务 ---------- */
-
+// ---------- 11. 启动服务 ----------
 app.listen(PORT, () => {
-  console.log('================================================');
+  console.log('==============================================');
   console.log('  任禹桐 · 个人名片网站 已启动');
-  console.log(`  主页：  http://localhost:${PORT}/`);
-  console.log(`  阅读：  http://localhost:${PORT}/reads`);
-  console.log(`  后台：  http://localhost:${PORT}/admin`);
-  console.log('  按 Ctrl + C 可停止服务');
-  console.log('================================================');
-
-  // 服务启动成功后，按需自动打开默认浏览器。
-  // 只有设置了环境变量 OPEN_BROWSER=1（start.bat 会设置）才打开，
-  // 部署到公网时不设置该变量，避免在服务器上误开浏览器。
-  if (process.env.OPEN_BROWSER === '1') {
-    const { exec } = require('child_process');
-    const url = `http://localhost:${PORT}/`;
-    const opener =
-      process.platform === 'win32' ? `start "" "${url}"`
-      : process.platform === 'darwin' ? `open "${url}"`
-      : `xdg-open "${url}"`;
-    exec(opener, (err) => {
-      if (err) console.log('  未能自动打开浏览器，请手动访问上面的地址');
-    });
-  }
+  console.log('  请打开浏览器访问：http://localhost:' + PORT);
+  console.log('  后台管理地址：    http://localhost:' + PORT + '/admin');
+  console.log('==============================================');
 });

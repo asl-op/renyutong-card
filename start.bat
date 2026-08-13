@@ -1,38 +1,35 @@
 @echo off
+rem ============================================================
+rem  start.bat —— 任禹桐个人名片网站 · 一键启动脚本（Windows）
+rem  作用：自动检查环境 → 首次自动安装依赖 → 启动服务器 → 打开浏览器
+rem ============================================================
 chcp 65001 >nul
 title 任禹桐 · 个人名片网站
-
-rem 切换到本脚本所在目录（保证相对路径正确）
 cd /d "%~dp0"
 
-rem 检查是否已安装 Node.js
+rem ---------- 1. 检查是否安装了 Node.js ----------
 where node >nul 2>nul
 if errorlevel 1 (
-    echo [错误] 未检测到 Node.js，请先安装 Node.js
-    echo 下载地址：https://nodejs.org/
-    echo.
+    echo [错误] 未检测到 Node.js。
+    echo        请先到 https://nodejs.org 下载并安装 LTS 版本，安装完成后重试。
     pause
     exit /b 1
 )
 
-rem 首次运行时自动安装依赖
+rem ---------- 2. 首次运行时自动安装依赖 ----------
 if not exist node_modules (
-    echo [首次运行] 正在安装依赖 express...
-    echo.
+    echo [信息] 首次运行，正在安装依赖 express ...
     call npm install
-    echo.
+    if errorlevel 1 (
+        echo [错误] 依赖安装失败，请检查网络后重试。
+        pause
+        exit /b 1
+    )
 )
 
-echo.
-echo  网站已启动：http://localhost:3000/
-echo  正在打开浏览器...（若未自动打开，请手动访问上面的地址）
-echo  关闭本窗口即可停止服务。
-echo.
-
-rem 设置 OPEN_BROWSER=1，让服务启动成功后自动打开默认浏览器
-set OPEN_BROWSER=1
+rem ---------- 3. 启动服务器并自动打开浏览器 ----------
+echo [信息] 正在启动服务器...
+start "" http://localhost:3000
 node server.js
 
-echo.
-echo [提示] 服务已停止。
 pause

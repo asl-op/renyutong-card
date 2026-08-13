@@ -1,7 +1,5 @@
-# 依赖目录（不提交，部署平台会自动执行 npm install）
 node_modules/
-
-# 系统 / 编辑器临时文件
-Thumbs.db
-.DS_Store
+npm-debug.log*
 *.log
+.DS_Store
+Thumbs.db
