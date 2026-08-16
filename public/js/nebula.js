@@ -28,12 +28,12 @@
       [51, 37, 92],      // 暗星云紫（少量）
     ],
     light: [
-      [205, 200, 235],   // 淡银紫（星云，多数）
-      [175, 168, 215],   // 银紫（星点）
-      [150, 145, 190],   // 深银紫（星点，较明显）
-      [185, 180, 220],   // 银紫
-      [130, 125, 170],   // 银紫灰（深色星点）
-      [225, 220, 245],   // 淡紫银（少量高光）
+      [214, 182, 226],   // 粉紫（星云，多数）
+      [188, 152, 208],   // 粉紫（星点）
+      [162, 128, 190],   // 深粉紫（星点，较明显）
+      [200, 166, 216],   // 淡粉紫
+      [140, 110, 176],   // 紫粉（深色星点）
+      [228, 204, 240],   // 极淡粉紫（高光）
     ],
   };
 
@@ -43,6 +43,8 @@
 
   const COUNT = Math.min(200, Math.max(120, Math.floor(window.innerWidth * 0.12)));
   const CONVERGE_MS = 4200;   // 汇聚动画时长（毫秒）
+  // 汇聚动画只在主页播放，其他页面直接进入环境态
+  const showIntro = location.pathname === '/' || location.pathname === '/index.html';
 
   // 预渲染柔光 Sprite
   function makeSprite(rgb) {
@@ -106,7 +108,7 @@
   }
 
   const ps = [];
-  for (let i = 0; i < COUNT; i++) ps.push(makeParticle(true));
+  for (let i = 0; i < COUNT; i++) ps.push(makeParticle(showIntro));
 
   function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -117,7 +119,7 @@
   function frame(now) {
     const elapsed = now - start;
     // 汇聚进度：每次进入都播放入场汇聚动画（系统开启「减少动画」时直接进入环境态）
-    const k = reduced ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
+    const k = (reduced || !showIntro) ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
     const spin = elapsed * 0.00012;
 
     ctx.clearRect(0, 0, W, H);
