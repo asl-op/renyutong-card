@@ -1,29 +1,26 @@
 /* ============================================================
-   全局样式 style.css —— 高级极简 · 深空紫雾星云质感（暗调）
-   配色（在参考图色值基础上整体压暗，保留星光白文字保证可读性）：
-     深空底 #050A24 · 水面深蓝 #071749 · 暗星云紫 #1F1142
-     中层紫雾 #241A4E · 亮紫星云 #3E2478 · 淡紫云雾 #492F7E
-     星光亮白 #F8FBFF · 星点高光 #FFFFFF
-   原则：低饱和、柔和自然，内容居中，文字星光白高可读
+   全局样式 style.css —— 高级极简 · 银紫星空质感
+   配色：深空蓝黑底 + 银紫色星云（紫色调浅、偏银紫），星光白文字
+   原则：低饱和、柔和自然，内容居中，整体留白克制不空旷
    ============================================================ */
 
 /* ---------- 1. 配色变量 ---------- */
 :root {
-  --bg-0: #050a24;              /* 深空底色（最深处，压暗） */
-  --bg-1: #071749;              /* 水面深蓝底色（压暗） */
-  --bg-2: #081238;              /* 基底（过渡） */
-  --nebula-dark: #1f1142;       /* 暗星云紫（压暗） */
-  --nebula-mid: #241a4e;        /* 中层紫雾（压暗） */
-  --nebula: #3e2478;            /* 亮紫星云（压暗） */
-  --accent: #492f7e;            /* 淡紫云雾（压暗，点缀 / 分类 / hover） */
-  --accent-soft: #6f55b0;       /* 淡紫（更亮，用于链接与 hover 文字） */
+  --bg-0: #070b2a;              /* 深空底色（最深） */
+  --bg-1: #081a52;              /* 水面深蓝底色 */
+  --bg-2: #0b1538;              /* 基底（过渡） */
+  --nebula-dark: #33255c;       /* 暗星云紫（偏银紫，调浅） */
+  --nebula-mid: #46356f;        /* 中层紫雾（调浅） */
+  --nebula: #6b4f9e;            /* 亮紫星云（调浅） */
+  --accent: #8a74c4;            /* 银紫（点缀 / 分类 / hover） */
+  --accent-soft: #b0a6d8;       /* 淡银紫（更亮，用于链接与 hover 文字） */
   --ink: #f8fbff;               /* 星光亮白 · 主文字 */
-  --ink-dim: #a6b1d8;           /* 次要文字（偏冷紫白） */
-  --ink-faint: #707a9c;         /* 弱化文字 */
+  --ink-dim: #b6c0e2;           /* 次要文字 */
+  --ink-faint: #8a94b4;         /* 弱化文字 */
   --star: #ffffff;              /* 星点高光 */
-  --line: rgba(120, 110, 190, .13);          /* 分隔线 / 星轨线 */
-  --glass: rgba(80, 55, 150, .13);           /* 玻璃高亮（紫） */
-  --card: rgba(8, 13, 34, .55);              /* 卡片底色 */
+  --line: rgba(155, 145, 215, .14);          /* 分隔线 / 星轨线 */
+  --glass: rgba(138, 116, 196, .13);         /* 玻璃高亮（银紫） */
+  --card: rgba(10, 15, 38, .55);             /* 卡片底色 */
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI",
           "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
   --nav-h: 60px;                /* 顶部导航高度 */
@@ -38,9 +35,8 @@ body {
   font-family: var(--font);
   color: var(--ink);
   background:
-    /* 两团极淡的紫雾星云底色（压暗），营造纵深，自然不刺眼 */
-    radial-gradient(1200px 800px at 72% -10%, rgba(31, 17, 66, .30), transparent 60%),
-    radial-gradient(1000px 720px at 8% 110%, rgba(7, 23, 73, .26), transparent 60%),
+    radial-gradient(1200px 800px at 72% -10%, rgba(51, 37, 92, .30), transparent 60%),
+    radial-gradient(1000px 720px at 8% 110%, rgba(8, 26, 82, .26), transparent 60%),
     var(--bg-0);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -48,7 +44,7 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-::selection { background: rgba(73, 47, 126, .30); }
+::selection { background: rgba(138, 116, 196, .28); }
 
 /* 通用入场淡入（轻柔） */
 @keyframes fadeUp {
@@ -58,11 +54,11 @@ a { color: inherit; text-decoration: none; }
 
 /* 渐变文字（高级质感） */
 .grad-text {
-  background: linear-gradient(120deg, #ffffff 0%, #c9bdf0 45%, var(--accent) 100%);
+  background: linear-gradient(120deg, #ffffff 0%, #d6cdf2 45%, var(--accent) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 2px 24px rgba(73, 47, 126, .28));
+  filter: drop-shadow(0 2px 24px rgba(138, 116, 196, .26));
 }
 
 /* ---------- 3. 星云背景画布 ---------- */
@@ -82,7 +78,7 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(4, 8, 26, .42);
+  background: rgba(5, 9, 28, .42);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
@@ -102,17 +98,17 @@ a { color: inherit; text-decoration: none; }
   background: var(--glass);
 }
 
-/* ---------- 5. 主页 hero（居中） ---------- */
+/* ---------- 5. 主页 hero（居中，留白克制） ---------- */
 .hero {
   position: relative;
   z-index: 10;
-  min-height: 100vh;
+  min-height: 84vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: calc(var(--nav-h) + 40px) 24px 80px;
+  padding: calc(var(--nav-h) + 20px) 24px 48px;
 }
 .hero > * { animation: fadeUp .9s ease backwards; }
 .hero > *:nth-child(1) { animation-delay: .15s; }
@@ -127,24 +123,24 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
   color: var(--accent-soft);
   opacity: .85;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .hero-title {
-  font-size: clamp(46px, 9vw, 96px);
+  font-size: clamp(44px, 8vw, 88px);
   font-weight: 200;
   letter-spacing: .14em;
 }
-.hero-title::after {              /* 名字下一条极细的星云光晕线 */
+.hero-title::after {
   content: '';
   display: block;
   width: 110px;
   height: 1px;
-  margin: 26px auto 0;
+  margin: 24px auto 0;
   background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
-  box-shadow: 0 0 12px rgba(73, 47, 126, .45);
+  box-shadow: 0 0 12px rgba(138, 116, 196, .4);
 }
 .hero-sub {
-  margin-top: 22px;
+  margin-top: 20px;
   font-size: 16px;
   letter-spacing: .06em;
   color: var(--ink-dim);
@@ -158,7 +154,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-faint);
 }
 .hero-actions {
-  margin-top: 40px;
+  margin-top: 36px;
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
@@ -178,7 +174,7 @@ a { color: inherit; text-decoration: none; }
 }
 .btn:hover {
   border-color: var(--accent-soft);
-  background: rgba(73, 47, 126, .20);
+  background: rgba(138, 116, 196, .18);
   color: #fff;
 }
 .btn.ghost { background: transparent; }
@@ -187,7 +183,7 @@ a { color: inherit; text-decoration: none; }
 .footer {
   position: relative;
   z-index: 10;
-  padding: 30px 24px 34px;
+  padding: 22px 24px 26px;
   text-align: center;
   font-size: 13px;
   letter-spacing: .04em;
@@ -201,16 +197,16 @@ a { color: inherit; text-decoration: none; }
 .page {
   position: relative;
   z-index: 10;
-  min-height: 100vh;
-  padding: calc(var(--nav-h) + 40px) 6vw 80px;
+  min-height: 84vh;
+  padding: calc(var(--nav-h) + 26px) 5vw 48px;
 }
 .page-head {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   animation: fadeUp .8s ease backwards;
 }
 .page-title {
-  font-size: 26px;
+  font-size: 25px;
   font-weight: 200;
   letter-spacing: .2em;
 }
@@ -227,10 +223,10 @@ a { color: inherit; text-decoration: none; }
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
   max-width: 1000px;
-  margin: 30px auto 0;
+  margin: 26px auto 0;
 }
 .project-card {
-  padding: 24px;
+  padding: 22px;
   border-radius: 16px;
   border: 1px solid var(--line);
   background: var(--card);
@@ -240,8 +236,8 @@ a { color: inherit; text-decoration: none; }
   animation: fadeUp .8s ease backwards;
 }
 .project-card:hover {
-  border-color: rgba(73, 47, 126, .42);
-  background: rgba(10, 15, 40, .62);
+  border-color: rgba(138, 116, 196, .4);
+  background: rgba(12, 18, 44, .62);
   transform: translateY(-3px);
 }
 .p-title { font-size: 18px; font-weight: 400; letter-spacing: .04em; }
@@ -285,29 +281,28 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(24px, 5vw, 64px);
+  gap: clamp(24px, 5vw, 60px);
   flex-wrap: wrap;
-  margin-top: 24px;
+  margin-top: 20px;
 }
-/* 左侧统计卡片 */
 .reads-stats {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  min-width: 132px;
+  gap: 14px;
+  min-width: 126px;
 }
 .stat-card {
-  padding: 22px 26px;
+  padding: 20px 24px;
   border-radius: 16px;
   border: 1px solid var(--line);
   background: var(--card);
   text-align: center;
-  min-width: 132px;
+  min-width: 126px;
   animation: fadeUp .8s ease backwards;
 }
 .stat-num {
   display: block;
-  font-size: 34px; font-weight: 200; letter-spacing: .04em;
+  font-size: 32px; font-weight: 200; letter-spacing: .04em;
   color: var(--ink);
 }
 .stat-label {
@@ -318,7 +313,7 @@ a { color: inherit; text-decoration: none; }
 /* 星图舞台（正方形） */
 .starmap {
   position: relative;
-  width: min(62vw, 520px);
+  width: min(66vw, 540px);
   aspect-ratio: 1 / 1;
   animation: fadeUp 1s ease backwards;
 }
@@ -329,28 +324,28 @@ a { color: inherit; text-decoration: none; }
   font-size: 12px; letter-spacing: .22em;
   color: var(--ink-faint);
 }
-/* 自转层：轨道 + 行星随整体缓慢自转 */
+/* 自转层：轨道 + 行星随整体自转（约 55 秒一圈，运转清晰可见） */
 .starmap-system {
   position: absolute; inset: 0;
-  animation: starmapSpin 110s linear infinite;   /* 约 2 分钟一圈，柔和可感知的环绕 */
+  animation: starmapSpin 55s linear infinite;
 }
 .starmap-orbit {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(120, 110, 190, .13);
+  border: 1px solid rgba(155, 145, 215, .13);
   pointer-events: none;
 }
 /* 中心 ME 原点 */
 .starmap-core {
   position: absolute; left: 50%; top: 50%;
   transform: translate(-50%, -50%);
-  width: 62px; height: 62px; border-radius: 50%;
+  width: 60px; height: 60px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; letter-spacing: .18em; color: var(--ink);
   background: radial-gradient(circle at 40% 35%,
-    rgba(248, 251, 255, .26), rgba(62, 36, 120, .16) 62%, rgba(8, 13, 34, .1));
-  border: 1px solid rgba(120, 110, 190, .26);
-  box-shadow: 0 0 32px rgba(73, 47, 126, .26), inset 0 0 16px rgba(248, 251, 255, .12);
+    rgba(248, 251, 255, .26), rgba(107, 79, 158, .16) 62%, rgba(10, 15, 38, .1));
+  border: 1px solid rgba(155, 145, 215, .26);
+  box-shadow: 0 0 32px rgba(138, 116, 196, .24), inset 0 0 16px rgba(248, 251, 255, .12);
 }
 /* 行星节点：按四分类着色，带微弱星芒光晕 */
 .starmap-node {
@@ -358,15 +353,15 @@ a { color: inherit; text-decoration: none; }
   width: 16px; height: 16px; border-radius: 50%;
   transform: translate(-50%, -50%);
   cursor: pointer;
-  background: radial-gradient(circle at 35% 30%, #fff, var(--planet-color, #492f7e) 58%, rgba(18, 24, 54, .82));
-  box-shadow: 0 0 14px 3px var(--planet-glow, rgba(73, 47, 126, .58)),
-              0 0 30px 8px rgba(73, 47, 126, .16);
+  background: radial-gradient(circle at 35% 30%, #fff, var(--planet-color, #8a74c4) 58%, rgba(18, 24, 54, .82));
+  box-shadow: 0 0 14px 3px var(--planet-glow, rgba(138, 116, 196, .58)),
+              0 0 30px 8px rgba(138, 116, 196, .15);
   transition: transform .3s ease, box-shadow .3s ease;
 }
 .starmap-node:hover {
   transform: translate(-50%, -50%) scale(1.4);
-  box-shadow: 0 0 20px 5px var(--planet-glow, rgba(73, 47, 126, .7)),
-              0 0 46px 12px rgba(73, 47, 126, .24);
+  box-shadow: 0 0 20px 5px var(--planet-glow, rgba(138, 116, 196, .7)),
+              0 0 46px 12px rgba(138, 116, 196, .22);
 }
 @keyframes starmapSpin {
   from { transform: rotate(0deg); }
@@ -381,7 +376,7 @@ a { color: inherit; text-decoration: none; }
   background: rgba(10, 15, 38, .92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(120, 110, 190, .18);
+  border: 1px solid rgba(155, 145, 215, .18);
   border-radius: 14px;
   padding: 18px 20px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
@@ -400,19 +395,19 @@ a { color: inherit; text-decoration: none; }
 .hc-summary { margin-top: 8px; font-size: 13px; line-height: 1.8; color: var(--ink-dim); }
 .hc-link { margin-top: 10px; font-size: 12px; color: var(--accent-soft); display: inline-block; }
 
-/* ---------- 11. 关于我页面（居中，高级留白） ---------- */
+/* ---------- 11. 关于我页面（居中，内部留白舒展） ---------- */
 .about {
   position: relative;
   z-index: 10;
-  min-height: 100vh;
+  min-height: 84vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--nav-h) + 40px) 24px 80px;
+  padding: calc(var(--nav-h) + 20px) 24px 48px;
 }
 .about-card {
   width: 100%;
-  max-width: 470px;
+  max-width: 520px;
   text-align: center;
   animation: fadeUp .9s ease backwards;
 }
@@ -424,13 +419,13 @@ a { color: inherit; text-decoration: none; }
   opacity: .85;
 }
 .about-name {
-  margin-top: 14px;
+  margin-top: 22px;
   font-size: clamp(34px, 6vw, 52px);
   font-weight: 200;
   letter-spacing: .12em;
 }
 .about-en {
-  margin-top: 12px;
+  margin-top: 16px;
   font-size: 12px;
   letter-spacing: .34em;
   color: var(--ink-dim);
@@ -439,45 +434,45 @@ a { color: inherit; text-decoration: none; }
 .about-rule {
   width: 74px;
   height: 1px;
-  margin: 24px auto 0;
+  margin: 34px auto 0;
   background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
-  box-shadow: 0 0 12px rgba(73, 47, 126, .45);
+  box-shadow: 0 0 12px rgba(138, 116, 196, .4);
 }
 .about-bio {
-  margin-top: 24px;
+  margin-top: 30px;
   font-size: 14px;
-  line-height: 2.1;
+  line-height: 2.25;
   color: var(--ink-dim);
   white-space: pre-line;
 }
 
 /* 联系方式列表 */
 .contact-list {
-  margin-top: 34px;
+  margin-top: 42px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 13px;
 }
 .contact-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 13px 18px;
+  padding: 14px 18px;
   border-radius: 12px;
   border: 1px solid var(--line);
   background: var(--card);
   transition: border-color .25s ease, background .25s ease;
 }
-a.contact-item:hover { border-color: var(--accent-soft); background: rgba(73, 47, 126, .10); }
+a.contact-item:hover { border-color: var(--accent-soft); background: rgba(138, 116, 196, .10); }
 .ci-label { font-size: 12px; letter-spacing: .14em; color: var(--ink-faint); }
 .ci-value { font-size: 14px; color: var(--ink); letter-spacing: .03em; }
 
 /* 技能标签 */
 .about-skills {
-  margin-top: 24px;
+  margin-top: 32px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 11px;
   justify-content: center;
 }
 .skill-tag {
@@ -495,7 +490,7 @@ a.contact-item:hover { border-color: var(--accent-soft); background: rgba(73, 47
   position: relative;
   z-index: 10;
   min-height: 100vh;
-  padding: calc(var(--nav-h) + 30px) 30px 60px;
+  padding: calc(var(--nav-h) + 26px) 30px 48px;
   max-width: 960px;
   margin: 0 auto;
 }
@@ -513,7 +508,7 @@ a.contact-item:hover { border-color: var(--accent-soft); background: rgba(73, 47
   cursor: pointer;
   transition: all .25s ease;
 }
-.admin-tab.active { color: var(--ink); background: var(--glass); border-color: rgba(120, 110, 190, .3); }
+.admin-tab.active { color: var(--ink); background: var(--glass); border-color: rgba(155, 145, 215, .3); }
 
 .admin-panel {
   display: grid;
@@ -560,11 +555,11 @@ a.contact-item:hover { border-color: var(--accent-soft); background: rgba(73, 47
   font-size: 14px;
   letter-spacing: .1em;
   color: #fff;
-  background: rgba(62, 36, 120, .32);
+  background: rgba(107, 79, 158, .3);
   cursor: pointer;
   transition: background .25s ease;
 }
-.admin-submit:hover { background: rgba(73, 47, 126, .44); }
+.admin-submit:hover { background: rgba(138, 116, 196, .42); }
 .admin-cancel {
   width: 100%;
   margin-top: 8px;
@@ -640,16 +635,16 @@ a.contact-item:hover { border-color: var(--accent-soft); background: rgba(73, 47
 .audio-toggle.is-on .ic-on { display: block; }
 .audio-toggle.is-on {
   color: var(--accent-soft);
-  border-color: rgba(73, 47, 126, .42);
-  box-shadow: 0 0 18px rgba(73, 47, 126, .22);
+  border-color: rgba(138, 116, 196, .4);
+  box-shadow: 0 0 18px rgba(138, 116, 196, .2);
 }
 
 /* ---------- 14. 响应式与无障碍 ---------- */
 @media (max-width: 720px) {
-  .starmap { width: min(88vw, 480px); }
+  .starmap { width: min(90vw, 480px); }
   .reads-layout { flex-direction: column; }
   .reads-stats { flex-direction: row; justify-content: center; }
-  .stat-card { min-width: 120px; padding: 18px 22px; }
+  .stat-card { min-width: 116px; padding: 16px 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

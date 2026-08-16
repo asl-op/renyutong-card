@@ -18,12 +18,12 @@
   // 四个知识象限的方位（屏幕坐标 y 向下：右=0°，下=90°，上=-90°）
   // color/glow 用于给各分类的行星做微弱着色区分，整体保持冷调统一
   const QUADRANTS = {
-    '技术':   { center: -45,  color: '#492f7e', glow: 'rgba(73,47,126,.6)' },     // 淡紫云雾（压暗）
-    '人文':   { center: -135, color: '#3e2478', glow: 'rgba(62,36,120,.6)' },      // 亮紫星云（压暗）
-    '科幻':   { center: 135,  color: '#241a4e', glow: 'rgba(36,26,78,.68)' },      // 中层紫雾（压暗）
+    '技术':   { center: -45,  color: '#8a74c4', glow: 'rgba(138,116,196,.6)' },     // 银紫
+    '人文':   { center: -135, color: '#6b4f9e', glow: 'rgba(107,79,158,.6)' },      // 亮紫星云
+    '科幻':   { center: 135,  color: '#46356f', glow: 'rgba(70,53,111,.65)' },      // 中层紫雾
     '方法论': { center: 45,   color: '#f8fbff', glow: 'rgba(248,251,255,.7)' },    // 星光亮白
   };
-  const RING_RADII = [0.16, 0.27, 0.38, 0.47]; // 轨道半径（占星图半边的比例，内圈→外圈）
+  const RING_RADII = [0.15, 0.29, 0.42, 0.53]; // 轨道半径（占星图半边的比例，内圈→外圈，拉开间距）
 
   const deg2rad = function (d) { return d * Math.PI / 180; };
   const escapeHtml = function (s) {
@@ -93,7 +93,7 @@
       const q = QUADRANTS[it.category] || QUADRANTS['技术'];
       const ring = Math.max(0, Math.min(RING_RADII.length - 1, Number(it.ring) || 0));
       const radius = RING_RADII[ring] * (m.size / 2);
-      const spread = (seeded(i) - 0.5) * 60;   // 在象限中心 ±30° 散布，避免重叠
+      const spread = (seeded(i) - 0.5) * 80;   // 在象限中心 ±40° 散布，让行星更分散
       const a = deg2rad(q.center + spread);
       const x = m.cx + Math.cos(a) * radius;
       const y = m.cy + Math.sin(a) * radius;
