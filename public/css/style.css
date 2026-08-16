@@ -688,8 +688,9 @@ a.contact-item:hover { border-color: var(--accent-soft); background: rgba(138, 1
 }
 [data-theme="light"] body {
   background:
-    radial-gradient(1200px 800px at 72% -10%, rgba(190, 180, 220, .5), transparent 60%),
-    radial-gradient(1000px 720px at 8% 110%, rgba(170, 185, 215, .45), transparent 60%),
+    radial-gradient(1300px 900px at 75% -10%, rgba(205, 200, 235, .7), transparent 62%),
+    radial-gradient(1000px 700px at 8% 105%, rgba(185, 195, 225, .62), transparent 62%),
+    radial-gradient(820px 620px at 50% 46%, rgba(226, 221, 246, .55), transparent 70%),
     var(--bg-0);
 }
 [data-theme="light"] .grad-text {

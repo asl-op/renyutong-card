@@ -28,12 +28,12 @@
       [51, 37, 92],      // 暗星云紫（少量）
     ],
     light: [
-      [150, 150, 182],   // 银灰蓝
-      [122, 114, 168],   // 银紫灰
-      [172, 168, 204],   // 淡银紫
-      [140, 134, 180],   // 银紫
-      [190, 187, 216],   // 更淡银紫
-      [104, 104, 150],   // 深银灰
+      [205, 200, 235],   // 淡银紫（星云，多数）
+      [175, 168, 215],   // 银紫（星点）
+      [150, 145, 190],   // 深银紫（星点，较明显）
+      [185, 180, 220],   // 银紫
+      [130, 125, 170],   // 银紫灰（深色星点）
+      [225, 220, 245],   // 淡紫银（少量高光）
     ],
   };
 
@@ -61,12 +61,7 @@
 
   let palette = PALETTES[currentTheme()];
   let sprites = palette.map(makeSprite);
-
-  // 开场汇聚动画：仅首次访问播放（用 localStorage 记住）
-  const INTRO_KEY = 'rt-intro-seen';
-  let introSeen = false;
-  try { introSeen = !!localStorage.getItem(INTRO_KEY); } catch (e) {}
-  let introMarked = introSeen;
+  let isLight = currentTheme() === 'light';
 
   function resize() {
     W = window.innerWidth;
@@ -111,7 +106,7 @@
   }
 
   const ps = [];
-  for (let i = 0; i < COUNT; i++) ps.push(makeParticle(!introSeen));
+  for (let i = 0; i < COUNT; i++) ps.push(makeParticle(true));
 
   function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -121,15 +116,9 @@
 
   function frame(now) {
     const elapsed = now - start;
-    // 汇聚进度：首次访问才走 0→1；非首次 / 减少动画则直接为 1
-    const k = (reduced || introSeen) ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
+    // 汇聚进度：每次进入都播放入场汇聚动画（系统开启「减少动画」时直接进入环境态）
+    const k = reduced ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
     const spin = elapsed * 0.00012;
-
-    // 首次汇聚完成后，标记「已看过」，下次访问不再播放
-    if (!introMarked && elapsed > CONVERGE_MS) {
-      introMarked = true;
-      try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
-    }
 
     ctx.clearRect(0, 0, W, H);
 
@@ -151,7 +140,8 @@
       const py = ((((y + m) % (H + m * 2)) + (H + m * 2)) % (H + m * 2)) - m;
 
       const r = p.size * 3.4;
-      ctx.globalAlpha = p.alpha * (0.4 + 0.6 * k);
+      const alphaMul = isLight ? 1.6 : 1.0;   // 白天模式下星点更明显
+      ctx.globalAlpha = p.alpha * alphaMul * (0.4 + 0.6 * k);
       ctx.drawImage(sprites[p.ci], px - r, py - r, r * 2, r * 2);
     }
     ctx.globalAlpha = 1;
@@ -163,6 +153,7 @@
   window.Card = window.Card || {};
   window.Card.applyTheme = function (theme) {
     palette = PALETTES[theme] || PALETTES.dark;
+    isLight = theme === 'light';
     sprites = palette.map(makeSprite);
     for (let i = 0; i < ps.length; i++) ps[i].ci = (Math.random() * palette.length) | 0;
   };
