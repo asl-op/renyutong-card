@@ -109,12 +109,19 @@
   const MAX_STARLIGHT = 22;      // 同时最多 22 颗
   let mouseX = -9999, mouseY = -9999, mouseAcc = 0;
 
-  function spawnStarlight(x, y) {
+  function spawnStarlight(x, y, dx, dy) {
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = dx / len, ny = dy / len;
+    const baseAngle = Math.atan2(-ny, -nx);   // 尾巴方向（运动反方向）
     const n = 3 + Math.floor(Math.random() * 3); // 每簇 3~5 颗
     for (let i = 0; i < n; i++) {
+      const a = baseAngle + (Math.random() - 0.5) * 0.9; // 尾巴方向轻微散布
       starlights.push({
         x: x + (Math.random() - 0.5) * 40,   // 聚集在光标附近
         y: y + (Math.random() - 0.5) * 40,
+        tx: Math.cos(a),
+        ty: Math.sin(a),
+        tail: 10 + Math.random() * 14,       // 尾巴长度（拉长一点）
         r: 0.8 + Math.random() * 1.3,        // 星光半径（更小更细）
         color: Math.random() < 0.72 ? '201,189,240' : '176,166,216', // 淡银紫 / 银紫
         life: 0,
@@ -130,7 +137,7 @@
     const dx = x - mouseX, dy = y - mouseY;
     mouseAcc += Math.hypot(dx, dy);
     if (mouseAcc >= MOUSE_SPAWN_DIST) {
-      spawnStarlight(x, y);
+      spawnStarlight(x, y, dx, dy);
       mouseAcc = 0;
     }
     mouseX = x; mouseY = y;
@@ -147,15 +154,29 @@
       s.life += dt;
       if (s.life >= s.maxLife) { starlights.splice(i, 1); continue; }
       const t = s.life / s.maxLife;
-      const alpha = Math.sin(Math.PI * t) * 0.85;  // 柔缓淡入 → 淡出（更亮）
-      const R = s.r * 2.0;                         // 光晕更收拢，整体更细
-      const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, R);
+      const alpha = Math.sin(Math.PI * t) * 0.95;  // 柔缓淡入 → 淡出（更亮）
+      const hx = s.x, hy = s.y;
+      const tx = s.x + s.tx * s.tail, ty = s.y + s.ty * s.tail;
+      // 尾巴：头部亮 → 尾部渐变黯淡
+      const lineGrad = ctx.createLinearGradient(hx, hy, tx, ty);
+      lineGrad.addColorStop(0, 'rgba(' + s.color + ',' + alpha + ')');
+      lineGrad.addColorStop(1, 'rgba(' + s.color + ',0)');
+      ctx.strokeStyle = lineGrad;
+      ctx.lineWidth = s.r * 0.8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      // 头部亮点（更亮）
+      const R = s.r * 2.0;
+      const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, R);
       grad.addColorStop(0, 'rgba(' + s.color + ',' + alpha + ')');
       grad.addColorStop(0.35, 'rgba(' + s.color + ',' + (alpha * 0.4) + ')');
       grad.addColorStop(1, 'rgba(' + s.color + ',0)');
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(s.x, s.y, R, 0, Math.PI * 2);
+      ctx.arc(hx, hy, R, 0, Math.PI * 2);
       ctx.fill();
     }
   }
