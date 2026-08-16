@@ -115,7 +115,7 @@
       starlights.push({
         x: x + (Math.random() - 0.5) * 40,   // 聚集在光标附近
         y: y + (Math.random() - 0.5) * 40,
-        r: 1.4 + Math.random() * 2.2,        // 星光半径
+        r: 0.8 + Math.random() * 1.3,        // 星光半径（更小更细）
         color: Math.random() < 0.72 ? '201,189,240' : '176,166,216', // 淡银紫 / 银紫
         life: 0,
         maxLife: 0.8 + Math.random() * 0.7,  // 存活时长（秒）
@@ -147,11 +147,11 @@
       s.life += dt;
       if (s.life >= s.maxLife) { starlights.splice(i, 1); continue; }
       const t = s.life / s.maxLife;
-      const alpha = Math.sin(Math.PI * t) * 0.5;   // 柔缓淡入 → 淡出
-      const R = s.r * 2.6;
+      const alpha = Math.sin(Math.PI * t) * 0.85;  // 柔缓淡入 → 淡出（更亮）
+      const R = s.r * 2.0;                         // 光晕更收拢，整体更细
       const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, R);
       grad.addColorStop(0, 'rgba(' + s.color + ',' + alpha + ')');
-      grad.addColorStop(0.4, 'rgba(' + s.color + ',' + (alpha * 0.45) + ')');
+      grad.addColorStop(0.35, 'rgba(' + s.color + ',' + (alpha * 0.4) + ')');
       grad.addColorStop(1, 'rgba(' + s.color + ',0)');
       ctx.fillStyle = grad;
       ctx.beginPath();
