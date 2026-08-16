@@ -10,7 +10,7 @@
   <!-- 全屏星云粒子背景画布 -->
   <canvas id="nebula" class="nebula"></canvas>
 
-  <!-- 顶部固定导航 -->
+  <!-- 顶部固定导航（4 个按钮） -->
   <header class="nav">
     <nav class="nav-links">
       <a href="/">主页</a>
@@ -20,21 +20,39 @@
     </nav>
   </header>
 
-  <!-- 太阳系同心环形星轨页面 -->
-  <main class="orbit-page">
+  <!-- 径向圈层星图页面 -->
+  <main class="page reads-page">
     <div class="page-head">
       <h2 class="page-title">阅读</h2>
-      <p class="page-desc">读书与随笔，是散落在轨道上的思想星尘 · 悬浮查看详情</p>
+      <p class="page-desc">书单与笔记，是散落在轨道上的思想星尘 · 悬浮星体查看详情</p>
     </div>
-    <!-- 星轨舞台：data-api 指定数据来源 -->
-    <div id="orbitStage" class="orbit-stage" data-api="/api/reads"></div>
+
+    <div class="reads-layout">
+      <!-- 左侧统计卡片（书籍总数 / 笔记数量） -->
+      <div id="readsStats" class="reads-stats"></div>
+
+      <!-- 径向圈层星图：中心 ME + 同心轨道 + 四象限星体节点 -->
+      <div id="starmap" class="starmap">
+        <div class="starmap-quadrants"></div>
+        <div class="starmap-system"></div>
+        <div class="starmap-core">ME</div>
+      </div>
+    </div>
   </main>
 
-  <!-- 悬浮详情卡片 -->
+  <!-- 悬浮详情卡片（星体节点 tooltip） -->
   <div id="hoverCard" class="hover-card"></div>
+
+  <!-- 页脚：预留联系方式 -->
+  <footer class="footer">
+    <a href="mailto:d.gloss.ad@gmail.com">d.gloss.ad@gmail.com</a>
+    <span class="sep">·</span>
+    <a href="https://github.com/asl-op" target="_blank" rel="noopener">GitHub</a>
+  </footer>
 
   <script src="/js/nebula.js"></script>
   <script src="/js/main.js"></script>
-  <script src="/js/orbit.js"></script>
+  <script src="/js/audio.js"></script>
+  <script src="/js/starmap.js"></script>
 </body>
 </html>

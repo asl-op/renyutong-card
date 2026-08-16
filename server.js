@@ -76,7 +76,7 @@ const DEFAULTS = {
     {
       id: 'prj-1001',
       title: '个人名片网站',
-      summary: '你正在浏览的这个站点：宇宙星轨主题，原生 JS 星云与太阳系同心轨道。',
+      summary: '你正在浏览的这个站点：极简宇宙星系质感，原生 JS 星云粒子 + 径向圈层星图，内置柔和深空环境音效。',
       category: 'Web 开发',
       link: 'https://github.com/asl-op',
       tags: ['Node.js', 'Express', '原生 JS'],
@@ -123,47 +123,50 @@ const DEFAULTS = {
     {
       id: 'rd-1001',
       title: '《代码整洁之道》笔记',
-      summary: '关于命名、函数与重构的读后整理：代码是写给人看的。',
+      intro: '关于命名、函数与重构的读后整理：代码是写给人看的。',
       category: '技术',
+      ring: 0,
       link: '',
-      tags: ['工程', '重构'],
-      date: '2026-07',
     },
     {
       id: 'rd-1002',
       title: '《人类简史》读书随笔',
-      summary: '从认知革命到科学革命，重新理解人类协作的想象共同体。',
-      category: '社科',
+      intro: '从认知革命到科学革命，重新理解人类协作的想象共同体。',
+      category: '人文',
+      ring: 0,
       link: '',
-      tags: ['历史', '认知'],
-      date: '2026-06',
     },
     {
       id: 'rd-1003',
       title: '《三体》读后感',
-      summary: '黑暗森林法则与宇宙社会学，科幻外壳下的人性思考。',
+      intro: '黑暗森林法则与宇宙社会学，科幻外壳下的人性思考。',
       category: '科幻',
+      ring: 0,
       link: '',
-      tags: ['科幻', '刘慈欣'],
-      date: '2026-05',
     },
     {
       id: 'rd-1004',
-      title: '关于宇宙与自我',
-      summary: '仰望星空时的零散随笔：我们只是星尘，却会思考宇宙。',
-      category: '随笔',
+      title: '《深入理解计算机系统》摘录',
+      intro: 'CSAPP 关键章节笔记：从位运算到存储层次。',
+      category: '技术',
+      ring: 1,
       link: '',
-      tags: ['随笔', '宇宙'],
-      date: '2026-04',
     },
     {
       id: 'rd-1005',
-      title: '《深入理解计算机系统》摘录',
-      summary: 'CSAPP 关键章节笔记：从位运算到存储层次。',
-      category: '技术',
+      title: '关于宇宙与自我',
+      intro: '仰望星空时的零散随笔：我们只是星尘，却会思考宇宙。',
+      category: '人文',
+      ring: 1,
       link: '',
-      tags: ['计算机', 'CSAPP'],
-      date: '2026-03',
+    },
+    {
+      id: 'rd-1006',
+      title: '《刻意练习》笔记',
+      intro: '从新手到高手的路径：刻意练习与心理表征。',
+      category: '方法论',
+      ring: 1,
+      link: '',
     },
   ],
   site: {
@@ -268,7 +271,7 @@ function mountResource(type) {
   });
 
   // 新增一条（需要管理密码，且仅本地可写）
-  app.post(`/api/${type}`, requireAdmin, writableOnly, (req, res) => {
+  app.post(`/api/${type}`, writableOnly, requireAdmin, (req, res) => {
     const items = list();
     const item = Object.assign({ id: genId(), date: '' }, req.body || {});
     items.push(item);
@@ -277,7 +280,7 @@ function mountResource(type) {
   });
 
   // 编辑一条（按 id 定位，需要管理密码，且仅本地可写）
-  app.put(`/api/${type}/:id`, requireAdmin, writableOnly, (req, res) => {
+  app.put(`/api/${type}/:id`, writableOnly, requireAdmin, (req, res) => {
     const items = list();
     const idx = items.findIndex((it) => it.id === req.params.id);
     if (idx === -1) return res.status(404).json({ message: '未找到该记录' });
@@ -288,7 +291,7 @@ function mountResource(type) {
   });
 
   // 删除一条（按 id 定位，需要管理密码，且仅本地可写）
-  app.delete(`/api/${type}/:id`, requireAdmin, writableOnly, (req, res) => {
+  app.delete(`/api/${type}/:id`, writableOnly, requireAdmin, (req, res) => {
     const items = list();
     const next = items.filter((it) => it.id !== req.params.id);
     if (next.length === items.length) return res.status(404).json({ message: '未找到该记录' });

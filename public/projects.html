@@ -10,7 +10,7 @@
   <!-- 全屏星云粒子背景画布 -->
   <canvas id="nebula" class="nebula"></canvas>
 
-  <!-- 顶部固定导航 -->
+  <!-- 顶部固定导航（4 个按钮） -->
   <header class="nav">
     <nav class="nav-links">
       <a href="/">主页</a>
@@ -20,21 +20,26 @@
     </nav>
   </header>
 
-  <!-- 太阳系同心环形星轨页面 -->
-  <main class="orbit-page">
+  <!-- 项目页：极简卡片列表 -->
+  <main class="page">
     <div class="page-head">
       <h2 class="page-title">项目</h2>
-      <p class="page-desc">每个项目都是一颗绕我公转的行星 · 悬浮查看详情</p>
+      <p class="page-desc">用代码点亮的小小星体，持续生长</p>
     </div>
-    <!-- 星轨舞台：data-api 指定数据来源 -->
-    <div id="orbitStage" class="orbit-stage" data-api="/api/projects"></div>
+    <!-- 卡片由 projects.js 从 /api/projects 动态渲染 -->
+    <div id="projectsGrid" class="projects-grid"></div>
   </main>
 
-  <!-- 悬浮详情卡片 -->
-  <div id="hoverCard" class="hover-card"></div>
+  <!-- 页脚：预留联系方式 -->
+  <footer class="footer">
+    <a href="mailto:d.gloss.ad@gmail.com">d.gloss.ad@gmail.com</a>
+    <span class="sep">·</span>
+    <a href="https://github.com/asl-op" target="_blank" rel="noopener">GitHub</a>
+  </footer>
 
   <script src="/js/nebula.js"></script>
   <script src="/js/main.js"></script>
-  <script src="/js/orbit.js"></script>
+  <script src="/js/audio.js"></script>
+  <script src="/js/projects.js"></script>
 </body>
 </html>

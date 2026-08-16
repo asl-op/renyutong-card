@@ -1,6 +1,7 @@
 /* ============================================================
    全局样式 style.css —— 高级极简 · 宇宙星系质感
-   配色：深空黑 / 暗靛蓝 / 星云紫 / 星尘青，低饱和、柔和内敛
+   配色：深空黑 / 暗靛蓝 / 星云紫 / 星尘青 / 淡胭脂红
+   原则：低饱和、弱高光、柔和内敛，文字浅银白保证高可读性
    ============================================================ */
 
 /* ---------- 1. 配色变量 ---------- */
@@ -12,6 +13,7 @@
   --violet: #55437a;            /* 星云紫 */
   --cyan: #86b5cc;              /* 星尘青 */
   --cyan-soft: #a9c8db;         /* 星尘青（亮） */
+  --rose: #cf8b97;              /* 淡胭脂红（星云点缀） */
   --ink: #e8ecf4;               /* 主文字 · 浅银白 */
   --ink-dim: #98a2bd;           /* 次要文字 */
   --ink-faint: #5c657d;         /* 弱化文字 */
@@ -42,6 +44,12 @@ body {
 a { color: inherit; text-decoration: none; }
 
 ::selection { background: rgba(134, 181, 204, .28); }
+
+/* 通用入场淡入（轻柔，不刺眼） */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
 
 /* ---------- 3. 星云背景画布 ---------- */
 .nebula {
@@ -92,6 +100,14 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
   padding: 0 24px;
 }
+/* 入场：各元素依次轻柔浮现 */
+.hero > * { animation: fadeUp .9s ease backwards; }
+.hero > *:nth-child(1) { animation-delay: .15s; }
+.hero > *:nth-child(2) { animation-delay: .3s; }
+.hero > *:nth-child(3) { animation-delay: .45s; }
+.hero > *:nth-child(4) { animation-delay: .6s; }
+.hero > *:nth-child(5) { animation-delay: .75s; }
+
 .hero-eyebrow {
   font-size: 12px;
   letter-spacing: .42em;
@@ -160,14 +176,18 @@ a { color: inherit; text-decoration: none; }
 .footer a { color: var(--ink-dim); transition: color .25s ease; }
 .footer a:hover { color: var(--ink); }
 
-/* ---------- 7. 星轨页面（项目 / 阅读） ---------- */
-.orbit-page {
+/* ---------- 7. 通用页面头部（项目 / 阅读 / 关于我） ---------- */
+.page {
   position: relative;
   z-index: 10;
   min-height: 100vh;
-  padding-top: var(--nav-h);     /* 让出导航高度 */
+  padding: calc(var(--nav-h) + 40px) 30px 80px;
 }
-.page-head { padding: 30px 44px 0; }
+.page-head {
+  text-align: center;
+  margin-bottom: 10px;
+  animation: fadeUp .8s ease backwards;
+}
 .page-title {
   font-size: 26px;
   font-weight: 300;
@@ -180,81 +200,161 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-faint);
 }
 
-/* 星轨舞台：占满导航下方的剩余空间 */
-.orbit-stage {
-  position: relative;
-  width: 100%;
-  height: calc(100vh - var(--nav-h) - 96px);
+/* ---------- 8. 项目页：卡片列表 ---------- */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 30px auto 0;
 }
-
-/* 轨道圈层：同心圆，带极淡羽化星云渐变底色 */
-.orbit-ring {
-  position: absolute;
-  border-radius: 50%;
+.project-card {
+  padding: 24px;
+  border-radius: 16px;
   border: 1px solid var(--line);
-  /* --tint 由 JS 设置，形成不同圈层的柔和底色 */
-  background: radial-gradient(circle, var(--tint, rgba(80, 60, 140, .05)) 0%, rgba(0, 0, 0, 0) 70%);
-  pointer-events: none;          /* 轨道本身不拦截鼠标 */
+  background: rgba(10, 14, 24, .5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color .3s ease, background .3s ease, transform .3s ease;
+  animation: fadeUp .8s ease backwards;
 }
+.project-card:hover {
+  border-color: rgba(134, 181, 204, .35);
+  background: rgba(14, 19, 32, .6);
+  transform: translateY(-3px);
+}
+.p-title { font-size: 18px; font-weight: 400; letter-spacing: .04em; }
+.p-meta {
+  margin-top: 8px;
+  display: flex; gap: 12px; align-items: center;
+  font-size: 12px; color: var(--ink-faint);
+}
+.p-cat { color: var(--cyan); letter-spacing: .12em; }
+.p-date { letter-spacing: .06em; }
+.p-summary { margin-top: 12px; font-size: 13px; line-height: 1.8; color: var(--ink-dim); }
+.p-tags { margin-top: 14px; }
+.p-link {
+  display: inline-block; margin-top: 14px;
+  font-size: 13px; color: var(--cyan-soft); letter-spacing: .04em;
+  transition: color .25s ease;
+}
+.p-link:hover { color: #fff; }
 
-/* 中心 ME 原点 */
-.orbit-core {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
+/* 通用小标签 */
+.tag {
+  display: inline-block;
+  padding: 4px 12px;
+  margin: 0 6px 6px 0;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--ink-dim);
+  border: 1px solid var(--line);
+  background: rgba(10, 14, 24, .5);
+}
+.empty-hint {
+  grid-column: 1 / -1;
+  text-align: center; font-size: 13px; color: var(--ink-faint);
+  padding: 40px 0;
+}
+.empty-hint a { color: var(--cyan-soft); }
+
+/* ---------- 9. 阅读页：径向圈层星图 ---------- */
+.reads-layout {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  letter-spacing: .2em;
-  color: var(--ink);
-  background: radial-gradient(circle at 40% 35%,
-    rgba(160, 180, 230, .32), rgba(60, 50, 110, .18) 62%, rgba(20, 24, 50, .1));
-  border: 1px solid rgba(150, 170, 220, .25);
-  box-shadow: 0 0 40px rgba(120, 150, 220, .22), inset 0 0 18px rgba(160, 180, 230, .18);
+  gap: clamp(24px, 5vw, 64px);
+  flex-wrap: wrap;
+  margin-top: 24px;
 }
-
-/* 星体节点（位置由 JS 通过 transform 更新） */
-.orbit-node {
-  position: absolute;
-  left: 50%;
-  top: 50%;
+/* 左侧统计卡片 */
+.reads-stats {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  will-change: transform;
+  gap: 16px;
+  min-width: 132px;
 }
-.node-dot {
-  width: 14px;
-  height: 14px;
+.stat-card {
+  padding: 22px 26px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(10, 14, 24, .5);
+  text-align: center;
+  min-width: 132px;
+  animation: fadeUp .8s ease backwards;
+}
+.stat-num {
+  display: block;
+  font-size: 34px; font-weight: 300; letter-spacing: .04em;
+  color: var(--ink);
+}
+.stat-label {
+  display: block; margin-top: 6px;
+  font-size: 12px; letter-spacing: .18em; color: var(--ink-faint);
+}
+
+/* 星图舞台（正方形） */
+.starmap {
+  position: relative;
+  width: min(62vw, 520px);
+  aspect-ratio: 1 / 1;
+  animation: fadeUp 1s ease backwards;
+}
+/* 四象限标签层（固定，不随星图自转） */
+.starmap-quadrants { position: absolute; inset: 0; pointer-events: none; }
+.quadrant-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 12px; letter-spacing: .22em;
+  color: var(--ink-faint);
+}
+/* 自转层：轨道 + 节点随整体缓慢自转 */
+.starmap-system {
+  position: absolute; inset: 0;
+  animation: starmapSpin 200s linear infinite;
+}
+/* 同心轨道：极细半透深空灰 */
+.starmap-orbit {
+  position: absolute;
   border-radius: 50%;
-  /* 星体：高光 + 本色 + 星芒光晕 */
-  background: radial-gradient(circle at 35% 30%,
-    #ffffff, var(--dot-color, #9fb8d8) 55%, rgba(60, 70, 110, .6));
-  box-shadow: 0 0 12px 2px var(--glow-color, rgba(130, 170, 220, .5)),
-              0 0 26px 6px rgba(120, 150, 220, .12);
+  border: 1px solid rgba(140, 160, 200, .14);
+  pointer-events: none;
+}
+/* 中心 ME 原点 */
+.starmap-core {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; letter-spacing: .18em; color: var(--ink);
+  background: radial-gradient(circle at 40% 35%,
+    rgba(160, 180, 230, .3), rgba(60, 50, 110, .16) 62%, rgba(20, 24, 50, .08));
+  border: 1px solid rgba(150, 170, 220, .25);
+  box-shadow: 0 0 34px rgba(120, 150, 220, .2), inset 0 0 16px rgba(160, 180, 230, .16);
+}
+/* 星体节点：微弱星芒光晕 */
+.starmap-node {
+  position: absolute; left: 0; top: 0;
+  width: 15px; height: 15px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  background: radial-gradient(circle at 35% 30%, #fff, #c7d3ea 55%, rgba(80, 95, 140, .7));
+  box-shadow: 0 0 12px 2px rgba(150, 185, 225, .5),
+              0 0 26px 6px rgba(120, 150, 220, .14);
   transition: transform .3s ease, box-shadow .3s ease;
 }
-.orbit-node:hover .node-dot {
-  transform: scale(1.5);
-  box-shadow: 0 0 18px 4px rgba(160, 200, 240, .65),
-              0 0 40px 10px rgba(130, 160, 220, .2);
+.starmap-node:hover {
+  transform: translate(-50%, -50%) scale(1.45);
+  box-shadow: 0 0 18px 4px rgba(170, 205, 240, .6),
+              0 0 40px 10px rgba(130, 160, 220, .22);
 }
-.node-label {
-  margin-top: 9px;
-  font-size: 12px;
-  letter-spacing: .05em;
-  color: var(--ink-dim);
-  white-space: nowrap;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, .85);   /* 保证在星云上可读 */
-  transition: color .3s ease;
+@keyframes starmapSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
-.orbit-node:hover .node-label { color: var(--ink); }
 
-/* ---------- 8. 悬浮详情卡片 ---------- */
+/* ---------- 10. 悬浮详情卡片（星图节点 tooltip） ---------- */
 .hover-card {
   position: fixed;
   z-index: 30;
@@ -275,15 +375,13 @@ a { color: inherit; text-decoration: none; }
 .hc-cat {
   font-size: 11px;
   letter-spacing: .2em;
-  text-transform: uppercase;
   color: var(--cyan);
 }
 .hc-title { margin-top: 8px; font-size: 17px; font-weight: 400; }
 .hc-summary { margin-top: 8px; font-size: 13px; line-height: 1.8; color: var(--ink-dim); }
-.hc-meta { margin-top: 12px; font-size: 12px; color: var(--ink-faint); }
 .hc-link { margin-top: 10px; font-size: 12px; color: var(--cyan-soft); display: inline-block; }
 
-/* ---------- 9. 关于我页面 ---------- */
+/* ---------- 11. 关于我页面 ---------- */
 .about {
   position: relative;
   z-index: 10;
@@ -297,6 +395,7 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   max-width: 520px;
   text-align: center;
+  animation: fadeUp .9s ease backwards;
 }
 .avatar {
   width: 92px;
@@ -377,7 +476,7 @@ a.contact-item:hover { border-color: var(--cyan-soft); background: rgba(120, 150
   background: rgba(10, 14, 24, .5);
 }
 
-/* ---------- 10. 后台管理页面 ---------- */
+/* ---------- 12. 后台管理页面 ---------- */
 .admin {
   position: relative;
   z-index: 10;
@@ -425,7 +524,7 @@ a.contact-item:hover { border-color: var(--cyan-soft); background: rgba(120, 150
   color: var(--ink-faint);
   margin-bottom: 6px;
 }
-.field input, .field textarea {
+.field input, .field textarea, .field select {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -437,7 +536,7 @@ a.contact-item:hover { border-color: var(--cyan-soft); background: rgba(120, 150
   outline: none;
   transition: border-color .25s ease;
 }
-.field input:focus, .field textarea:focus { border-color: var(--cyan-soft); }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--cyan-soft); }
 .field textarea { min-height: 64px; resize: vertical; }
 .field .hint { font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
 
@@ -478,6 +577,7 @@ a.contact-item:hover { border-color: var(--cyan-soft); background: rgba(120, 150
 .admin-item .ai-title { font-size: 15px; }
 .admin-item .ai-cat { font-size: 11px; letter-spacing: .12em; color: var(--cyan); margin-top: 4px; }
 .admin-item .ai-summary { font-size: 13px; color: var(--ink-dim); margin-top: 8px; line-height: 1.7; }
+.admin-item .ai-tags { margin-top: 10px; }
 .admin-item .ai-actions { margin-top: 12px; display: flex; gap: 10px; }
 .ai-actions button {
   padding: 6px 16px;
@@ -500,4 +600,49 @@ a.contact-item:hover { border-color: var(--cyan-soft); background: rgba(120, 150
   font-size: 12px;
   line-height: 1.8;
   color: var(--ink-faint);
+}
+
+/* ---------- 13. 音效开关（右下角） ---------- */
+.audio-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(8, 11, 20, .6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: .08em;
+  cursor: pointer;
+  transition: color .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.audio-toggle:hover { color: var(--ink); border-color: var(--cyan-soft); }
+.audio-toggle svg { width: 16px; height: 16px; flex: none; }
+.audio-toggle .ic-on { display: none; }          /* 默认显示「关闭」图标 */
+.audio-toggle.is-on .ic-off { display: none; }
+.audio-toggle.is-on .ic-on { display: block; }
+.audio-toggle.is-on {
+  color: var(--cyan-soft);
+  border-color: rgba(134, 181, 204, .4);
+  box-shadow: 0 0 18px rgba(120, 180, 210, .25);
+}
+
+/* ---------- 14. 响应式与无障碍 ---------- */
+@media (max-width: 720px) {
+  .starmap { width: min(88vw, 480px); }
+  .reads-layout { flex-direction: column; }
+  .reads-stats { flex-direction: row; justify-content: center; }
+  .stat-card { min-width: 120px; padding: 18px 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starmap-system { animation: none; }
+  .hero > *, .project-card, .stat-card, .starmap, .about-card, .page-head { animation: none; }
 }

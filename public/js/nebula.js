@@ -1,20 +1,52 @@
 /**
- * nebula.js —— 全屏星云粒子背景
- * 效果：
- *  1. 银河星尘粒子缓慢漂移（低性能消耗）
- *  2. 鼠标移动产生视差（越深层的粒子移动越明显）
- *  3. 鼠标附近的粒子受到轻微「引力扰动」，柔和聚拢
- * 实现：纯原生 Canvas，无第三方库、无外部图片
+ * nebula.js —— 全屏星云粒子背景（原生 Canvas，无第三方库、无外部图片）
+ * 效果（对标真实哈勃星系的静谧质感）：
+ *   1. 入场动画：粒子从屏幕外四散状态缓慢「汇聚成型」（约 4 秒，慢入慢出）
+ *   2. 环境态：星尘缓慢漂移 + 极慢的整体星系自转
+ *   3. 视差：粒子按深度呈现「近大远小、近亮远暗」
+ *   4. 星芒：预渲染柔光贴图，低性能消耗、帧率稳定
+ * 实现：requestAnimationFrame + 离屏柔光 Sprite，柔和内敛、无爆炸闪光
  */
 (function () {
   const canvas = document.getElementById('nebula');
   if (!canvas) return;                 // 页面没有该画布时直接跳过
   const ctx = canvas.getContext('2d');
 
-  let W = 0, H = 0;                    // 视口宽高
-  const DPR = Math.min(window.devicePixelRatio || 1, 1.5); // 限制像素比，兼顾清晰度与性能
+  // 是否偏好减少动画（无障碍）
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // 自适应画布尺寸（高清屏下放大物理像素）
+  let W = 0, H = 0;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2); // 限制像素比，兼顾清晰度与性能
+
+  // 低饱和星云配色（RGB）—— 银白 / 星尘青 / 星云紫 / 淡紫 / 淡胭脂红
+  const PALETTE = [
+    [232, 236, 244],
+    [121, 200, 196],
+    [91, 74, 138],
+    [138, 124, 190],
+    [207, 139, 151],
+  ];
+
+  // 粒子数量：随屏幕自适应，封顶保证性能
+  const COUNT = Math.min(200, Math.max(120, Math.floor(window.innerWidth * 0.12)));
+  const CONVERGE_MS = 4200;            // 汇聚动画时长（毫秒）
+
+  // 预渲染每颗颜色的柔光 Sprite（避免逐帧画径向渐变，性能更好）
+  function makeSprite(rgb) {
+    const s = 64;
+    const c = document.createElement('canvas');
+    c.width = c.height = s;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+    grad.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',1)');
+    grad.addColorStop(0.3, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.45)');
+    grad.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, s, s);
+    return c;
+  }
+  const sprites = PALETTE.map(makeSprite);
+
   function resize() {
     W = window.innerWidth;
     H = window.innerHeight;
@@ -26,105 +58,92 @@
   }
   resize();
 
-  // ---------- 粒子配置 ----------
-  const COUNT = 150;                   // 粒子数量（控制性能与密度）
-  // 星尘配色：白 / 青 / 紫 / 靛蓝，都是低饱和柔和色
-  const COLORS = [
-    [255, 255, 255],   // 星尘白
-    [150, 185, 220],   // 星尘青
-    [175, 150, 220],   // 星云紫
-    [120, 140, 200],   // 暗靛蓝
-  ];
-
-  // 把颜色数组转成 rgba 字符串
-  function color(n, a) {
-    const c = COLORS[n % COLORS.length];
-    return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+  // 高斯随机：让锚点更偏向中心，形成松散的星云团
+  function gauss() {
+    return (Math.random() + Math.random() + Math.random()) / 3 - 0.5;
   }
 
-  // 鼠标状态（位置 + 相对中心的偏移 -1..1）
-  const mouse = { x: -9999, y: -9999, offX: 0, offY: 0, active: false };
+  // 生成单个粒子
+  function makeParticle(scattered) {
+    const p = {
+      ci: (Math.random() * PALETTE.length) | 0, // 颜色索引
+      z: Math.random(),                          // 深度 0~1：越大越近
+      size: 0.6 + Math.random() * 2.2,           // 近大远小（半径基数）
+      alpha: 0.10 + Math.random() * 0.28,        // 近亮远暗（基础透明度）
+      orbitR: 20 + Math.random() * 240,          // 自转轨道半径（深层更靠外，视差更强）
+      orbitA: Math.random() * Math.PI * 2,       // 自转相位
+      orbitV: (Math.random() - 0.5) * 0.08,      // 自转角速度（极慢）
+      driftX: (Math.random() - 0.5) * 0.05,      // 漂移速度
+      driftY: (Math.random() - 0.5) * 0.05,
+      dx: 0, dy: 0,                              // 漂移累计位移
+    };
 
-  // 生成所有粒子
+    // 汇聚起点：屏幕外较远处（四散状态）
+    if (scattered) {
+      const a = Math.random() * Math.PI * 2;
+      const d = Math.max(W, H) * (0.6 + Math.random() * 0.9);
+      p.sx = W / 2 + Math.cos(a) * d;
+      p.sy = H / 2 + Math.sin(a) * d;
+    } else {
+      p.sx = Math.random() * W;
+      p.sy = Math.random() * H;
+    }
+    // 最终锚点：偏向中心
+    p.tx = W / 2 + gauss() * W * 0.9;
+    p.ty = H / 2 + gauss() * H * 0.9;
+    return p;
+  }
+
   const ps = [];
-  for (let i = 0; i < COUNT; i++) {
-    ps.push({
-      x: Math.random() * W,             // 横坐标
-      y: Math.random() * H,             // 纵坐标
-      depth: 0.15 + Math.random() * 0.85, // 深度：决定视差强度
-      r: 0.4 + Math.random() * 1.5,     // 半径
-      a: 0.12 + Math.random() * 0.5,    // 基础透明度
-      vx: (Math.random() - 0.5) * 0.05, // 漂移速度 x
-      vy: (Math.random() - 0.5) * 0.05, // 漂移速度 y
-      c: Math.floor(Math.random() * COLORS.length), // 颜色索引
-      tw: Math.random() * Math.PI * 2,  // 闪烁初始相位
-    });
+  for (let i = 0; i < COUNT; i++) ps.push(makeParticle(true));
+
+  // 慢入慢出缓动
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  // 更新单个粒子：漂移 + 边界循环 + 鼠标引力扰动
-  function step(p) {
-    p.x += p.vx;
-    p.y += p.vy;
+  const start = performance.now();
 
-    // 超出边界后从另一侧回来，形成无限星尘
-    if (p.x < -30) p.x = W + 30;
-    if (p.x > W + 30) p.x = -30;
-    if (p.y < -30) p.y = H + 30;
-    if (p.y > H + 30) p.y = -30;
+  function frame(now) {
+    const elapsed = now - start;
+    // 汇聚进度 0→1；完成后自然退化为环境漂移
+    const k = reduced ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
+    // 全局自转角：极慢（约 14 分钟转一圈），营造星系自转
+    const spin = elapsed * 0.00012;
 
-    // 鼠标附近的粒子被轻微吸引（引力扰动，柔和）
-    if (mouse.active) {
-      const dx = mouse.x - p.x;
-      const dy = mouse.y - p.y;
-      const d2 = dx * dx + dy * dy;
-      const R = 130;                   // 影响半径
-      if (d2 < R * R) {
-        const d = Math.sqrt(d2) || 1;
-        const f = (1 - d / R) * 0.16 * p.depth; // 越近引力越强，深层粒子更敏感
-        p.x += (dx / d) * f;
-        p.y += (dy / d) * f;
-      }
-    }
-  }
-
-  // 绘制单个粒子：视差偏移 + 呼吸闪烁
-  function draw(p, t) {
-    // 视差：鼠标偏离中心越远，深层粒子偏移越大
-    const px = p.x + mouse.offX * p.depth * 28;
-    const py = p.y + mouse.offY * p.depth * 28;
-    // 呼吸闪烁：透明度随时间缓慢起伏
-    const alpha = p.a * (0.55 + 0.45 * Math.sin(t * 0.0009 + p.tw));
-    ctx.fillStyle = color(p.c, alpha);
-    ctx.beginPath();
-    ctx.arc(px, py, p.r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // 主循环
-  function frame(t) {
     ctx.clearRect(0, 0, W, H);
+
     for (let i = 0; i < ps.length; i++) {
-      step(ps[i]);
-      draw(ps[i], t);
+      const p = ps[i];
+      p.orbitA += p.orbitV * 0.0004;
+      p.dx += p.driftX;
+      p.dy += p.driftY;
+
+      // 汇聚插值：起点 → 锚点
+      const lx = p.sx + (p.tx - p.sx) * k;
+      const ly = p.sy + (p.ty - p.sy) * k;
+      // 自转偏移（随汇聚逐渐成形）
+      const ox = Math.cos(p.orbitA + spin) * p.orbitR * k;
+      const oy = Math.sin(p.orbitA + spin) * p.orbitR * k;
+      // 缓慢漂移
+      const x = lx + ox + p.dx;
+      const y = ly + oy + p.dy;
+
+      // 柔和包裹回屏，避免粒子突然消失
+      const m = 90;
+      const px = ((((x + m) % (W + m * 2)) + (W + m * 2)) % (W + m * 2)) - m;
+      const py = ((((y + m) % (H + m * 2)) + (H + m * 2)) % (H + m * 2)) - m;
+
+      // 汇聚过程中渐亮，成型后的星云更柔和明亮
+      const r = p.size * 3.4;
+      ctx.globalAlpha = p.alpha * (0.4 + 0.6 * k);
+      ctx.drawImage(sprites[p.ci], px - r, py - r, r * 2, r * 2);
     }
+    ctx.globalAlpha = 1;
     requestAnimationFrame(frame);
   }
-
-  // 监听鼠标移动与离开
-  window.addEventListener('mousemove', function (e) {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-    mouse.offX = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouse.offY = (e.clientY / window.innerHeight - 0.5) * 2;
-    mouse.active = true;
-  });
-  window.addEventListener('mouseleave', function () {
-    mouse.active = false;
-  });
-
-  // 窗口缩放时重新计算尺寸
-  window.addEventListener('resize', resize);
-
-  // 开始渲染
   requestAnimationFrame(frame);
+
+  // 窗口缩放时重新计算尺寸（粒子锚点不重算，保持环境稳定）
+  window.addEventListener('resize', resize);
 })();

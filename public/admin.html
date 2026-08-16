@@ -10,7 +10,7 @@
   <!-- 全屏星云粒子背景画布 -->
   <canvas id="nebula" class="nebula"></canvas>
 
-  <!-- 顶部固定导航 -->
+  <!-- 顶部固定导航（4 个按钮） -->
   <header class="nav">
     <nav class="nav-links">
       <a href="/">主页</a>
@@ -24,56 +24,23 @@
   <main class="admin">
     <h1>后台管理</h1>
 
-    <!-- 分类切换 -->
+    <!-- 分类切换：项目 / 阅读 -->
     <div class="admin-tabs">
       <button class="admin-tab active" data-type="projects">项目</button>
       <button class="admin-tab" data-type="reads">阅读</button>
     </div>
 
-    <div class="admin-panel">
-      <!-- 左侧：内容列表 -->
-      <div id="adminList" class="admin-list"></div>
-
-      <!-- 右侧：新增 / 编辑表单 -->
-      <form id="itemForm" class="admin-form" autocomplete="off">
-        <h2 id="formTitle">新增项目</h2>
-        <div class="field">
-          <label>标题 *</label>
-          <input id="fTitle" type="text" placeholder="例如：个人名片网站">
-        </div>
-        <div class="field">
-          <label>简介</label>
-          <textarea id="fSummary" placeholder="一句话介绍，会显示在悬浮卡片里"></textarea>
-        </div>
-        <div class="field">
-          <label>分类</label>
-          <input id="fCategory" type="text" placeholder="例如：Web 开发 / 技术 / 随笔">
-          <div class="hint">相同分类的内容会分布到同一条星轨上</div>
-        </div>
-        <div class="field">
-          <label>链接（可选）</label>
-          <input id="fLink" type="text" placeholder="https://github.com/asl-op">
-        </div>
-        <div class="field">
-          <label>日期</label>
-          <input id="fDate" type="text" placeholder="例如：2026-08">
-        </div>
-        <div class="field">
-          <label>标签（用逗号分隔）</label>
-          <input id="fTags" type="text" placeholder="Node.js, 原生 JS">
-        </div>
-        <button id="submitBtn" class="admin-submit" type="submit">新增并保存</button>
-        <button id="cancelEdit" class="admin-cancel" type="button" style="display:none;">取消编辑</button>
-      </form>
-    </div>
+    <!-- 列表 + 表单由 admin.js 按配置动态生成 -->
+    <div id="adminRoot"></div>
 
     <p class="admin-tip">
-      提示：新增 / 编辑 / 删除后，数据会立即写入 data 目录下的 JSON 文件，前端「项目」「阅读」页面的星轨会自动刷新渲染，无需改动任何前端代码。
+      提示：新增 / 编辑 / 删除后，数据会立即写入 data 目录下的 JSON 文件，前端「项目」「阅读」页面会自动刷新渲染，无需改动任何前端代码。
       写操作需要管理密码：本地首次启动自动生成（控制台会打印，保存在 data/.admin-password）；部署版在 Render 后台 Environment 里设置 ADMIN_PASSWORD。
     </p>
   </main>
 
   <script src="/js/nebula.js"></script>
+  <script src="/js/audio.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>
