@@ -105,8 +105,8 @@
 
   // ---------- 流星（跟随鼠标，少量，柔和） ----------
   const meteors = [];
-  const MOUSE_SPAWN_DIST = 30;   // 鼠标每移动约 30px 生成一颗，保持「少量」
-  const MAX_METEORS = 12;        // 同时最多 12 颗
+  const MOUSE_SPAWN_DIST = 36;   // 鼠标每移动约 36px 生成一颗，更稀疏柔和
+  const MAX_METEORS = 10;        // 同时最多 10 颗
   let mouseX = -9999, mouseY = -9999, mouseAcc = 0;
 
   function spawnMeteor(x, y, dx, dy) {
@@ -117,7 +117,7 @@
       tx: -nx, ty: -ny,                   // 尾巴指向运动反方向，形成拖尾跟随
       tail: 16 + Math.random() * 22,      // 尾巴长度
       life: 0,
-      maxLife: 0.45 + Math.random() * 0.35, // 存活时长（秒）
+      maxLife: 0.55 + Math.random() * 0.4,  // 存活时长（秒），更舒缓
     });
     if (meteors.length > MAX_METEORS) meteors.shift();
   }
@@ -145,24 +145,24 @@
       m.life += dt;
       if (m.life >= m.maxLife) { meteors.splice(i, 1); continue; }
       const k = 1 - m.life / m.maxLife;        // 1 → 0 淡出
-      const alpha = k * 0.85;
+      const alpha = k * k * 0.6;               // 缓出淡出，更柔和
       const hx = m.x, hy = m.y;
       const tx = m.x + m.tx * m.tail, ty = m.y + m.ty * m.tail;
-      // 尾巴：头部亮白 → 尾部淡银紫消失
+      // 尾巴：头部银紫星光 → 尾部透明；与页面同色系，又区别于白色星点
       const grad = ctx.createLinearGradient(hx, hy, tx, ty);
-      grad.addColorStop(0, 'rgba(255,255,255,' + alpha + ')');
+      grad.addColorStop(0, 'rgba(201,189,240,' + alpha + ')');
       grad.addColorStop(1, 'rgba(176,166,216,0)');
       ctx.strokeStyle = grad;
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.5;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(hx, hy);
       ctx.lineTo(tx, ty);
       ctx.stroke();
-      // 头部亮点
-      ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
+      // 头部星光亮点（银紫）
+      ctx.fillStyle = 'rgba(201,189,240,' + alpha + ')';
       ctx.beginPath();
-      ctx.arc(hx, hy, 1.5, 0, Math.PI * 2);
+      ctx.arc(hx, hy, 1.3, 0, Math.PI * 2);
       ctx.fill();
     }
   }
