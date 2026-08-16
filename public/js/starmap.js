@@ -16,11 +16,12 @@
   const statsEl = document.getElementById('readsStats');
 
   // 四个知识象限的方位（屏幕坐标 y 向下：右=0°，下=90°，上=-90°）
+  // color/glow 用于给各分类的行星做微弱着色区分，整体保持冷调统一
   const QUADRANTS = {
-    '技术':   { center: -45 },
-    '人文':   { center: -135 },
-    '科幻':   { center: 135 },
-    '方法论': { center: 45 },
+    '技术':   { center: -45,  color: '#7fb8d8', glow: 'rgba(127,184,216,.55)' },
+    '人文':   { center: -135, color: '#9fb4d8', glow: 'rgba(159,180,216,.55)' },
+    '科幻':   { center: 135,  color: '#6fb4c6', glow: 'rgba(111,180,198,.55)' },
+    '方法论': { center: 45,   color: '#c7d4e8', glow: 'rgba(199,212,232,.6)' },
   };
   const RING_RADII = [0.16, 0.27, 0.38, 0.47]; // 轨道半径（占星图半边的比例，内圈→外圈）
 
@@ -101,6 +102,9 @@
       node.className = 'starmap-node';
       node.style.left = x + 'px';
       node.style.top = y + 'px';
+      // 行星按四分类着色（微弱区分，保持整体冷调统一）
+      node.style.setProperty('--planet-color', q.color);
+      node.style.setProperty('--planet-glow', q.glow);
       node.addEventListener('mouseenter', function () { showCard(it); });
       node.addEventListener('mousemove', moveCard);
       node.addEventListener('mouseleave', hideCard);
