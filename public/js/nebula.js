@@ -103,10 +103,77 @@
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
+  // ---------- 流星（跟随鼠标，少量，柔和） ----------
+  const meteors = [];
+  const MOUSE_SPAWN_DIST = 30;   // 鼠标每移动约 30px 生成一颗，保持「少量」
+  const MAX_METEORS = 12;        // 同时最多 12 颗
+  let mouseX = -9999, mouseY = -9999, mouseAcc = 0;
+
+  function spawnMeteor(x, y, dx, dy) {
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = dx / len, ny = dy / len;   // 鼠标运动方向
+    meteors.push({
+      x: x, y: y,
+      tx: -nx, ty: -ny,                   // 尾巴指向运动反方向，形成拖尾跟随
+      tail: 16 + Math.random() * 22,      // 尾巴长度
+      life: 0,
+      maxLife: 0.45 + Math.random() * 0.35, // 存活时长（秒）
+    });
+    if (meteors.length > MAX_METEORS) meteors.shift();
+  }
+
+  function onMove(x, y) {
+    if (reduced) return;
+    if (mouseX === -9999) { mouseX = x; mouseY = y; return; }
+    const dx = x - mouseX, dy = y - mouseY;
+    mouseAcc += Math.hypot(dx, dy);
+    if (mouseAcc >= MOUSE_SPAWN_DIST) {
+      spawnMeteor(x, y, dx, dy);
+      mouseAcc = 0;
+    }
+    mouseX = x; mouseY = y;
+  }
+
+  window.addEventListener('mousemove', function (e) { onMove(e.clientX, e.clientY); });
+  window.addEventListener('touchmove', function (e) {
+    if (e.touches && e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  function updateMeteors(dt) {
+    for (let i = meteors.length - 1; i >= 0; i--) {
+      const m = meteors[i];
+      m.life += dt;
+      if (m.life >= m.maxLife) { meteors.splice(i, 1); continue; }
+      const k = 1 - m.life / m.maxLife;        // 1 → 0 淡出
+      const alpha = k * 0.85;
+      const hx = m.x, hy = m.y;
+      const tx = m.x + m.tx * m.tail, ty = m.y + m.ty * m.tail;
+      // 尾巴：头部亮白 → 尾部淡银紫消失
+      const grad = ctx.createLinearGradient(hx, hy, tx, ty);
+      grad.addColorStop(0, 'rgba(255,255,255,' + alpha + ')');
+      grad.addColorStop(1, 'rgba(176,166,216,0)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      // 头部亮点
+      ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
   const start = performance.now();
+  let lastNow = start;
 
   function frame(now) {
     const elapsed = now - start;
+    const dt = Math.min((now - lastNow) / 1000, 0.1); // 帧间隔（秒），限制上限防跳帧
+    lastNow = now;
     // 汇聚进度 0→1；完成后自然退化为环境漂移
     const k = reduced ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
     // 全局自转角：极慢（约 14 分钟转一圈），营造星系自转
@@ -141,6 +208,10 @@
       ctx.drawImage(sprites[p.ci], px - r, py - r, r * 2, r * 2);
     }
     ctx.globalAlpha = 1;
+
+    // 流星（跟随鼠标，少量）
+    if (!reduced) updateMeteors(dt);
+
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
