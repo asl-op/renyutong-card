@@ -103,30 +103,25 @@
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  // ---------- 流星（跟随鼠标，少量，柔和） ----------
-  const meteors = [];
-  const MOUSE_SPAWN_DIST = 48;   // 鼠标每移动约 48px 触发一簇流星雨
-  const MAX_METEORS = 24;        // 同时最多 24 颗（可容纳多簇）
+  // ---------- 星光（跟随鼠标，柔缓点状星光） ----------
+  const starlights = [];
+  const MOUSE_SPAWN_DIST = 34;   // 鼠标每移动约 34px 生成一簇星光
+  const MAX_STARLIGHT = 22;      // 同时最多 22 颗
   let mouseX = -9999, mouseY = -9999, mouseAcc = 0;
 
-  function spawnBurst(x, y, dx, dy) {
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = dx / len, ny = dy / len;
-    const baseAngle = Math.atan2(-ny, -nx);   // 拖尾基准方向（运动反方向）
-    const n = 4 + Math.floor(Math.random() * 3); // 每簇 4~6 颗，形成流星雨
+  function spawnStarlight(x, y) {
+    const n = 3 + Math.floor(Math.random() * 3); // 每簇 3~5 颗
     for (let i = 0; i < n; i++) {
-      const a = baseAngle + (Math.random() - 0.5) * 1.1; // 围绕基准方向 ±~31°，聚集放射
-      meteors.push({
-        x: x + (Math.random() - 0.5) * 30,   // 聚集在光标附近
-        y: y + (Math.random() - 0.5) * 30,
-        tx: Math.cos(a),
-        ty: Math.sin(a),
-        tail: 14 + Math.random() * 26,       // 尾巴长度
+      starlights.push({
+        x: x + (Math.random() - 0.5) * 40,   // 聚集在光标附近
+        y: y + (Math.random() - 0.5) * 40,
+        r: 1.4 + Math.random() * 2.2,        // 星光半径
+        color: Math.random() < 0.72 ? '201,189,240' : '176,166,216', // 淡银紫 / 银紫
         life: 0,
-        maxLife: 0.5 + Math.random() * 0.5,  // 存活时长（秒）
+        maxLife: 0.8 + Math.random() * 0.7,  // 存活时长（秒）
       });
     }
-    while (meteors.length > MAX_METEORS) meteors.shift();
+    while (starlights.length > MAX_STARLIGHT) starlights.shift();
   }
 
   function onMove(x, y) {
@@ -135,7 +130,7 @@
     const dx = x - mouseX, dy = y - mouseY;
     mouseAcc += Math.hypot(dx, dy);
     if (mouseAcc >= MOUSE_SPAWN_DIST) {
-      spawnBurst(x, y, dx, dy);
+      spawnStarlight(x, y);
       mouseAcc = 0;
     }
     mouseX = x; mouseY = y;
@@ -146,30 +141,21 @@
     if (e.touches && e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
 
-  function updateMeteors(dt) {
-    for (let i = meteors.length - 1; i >= 0; i--) {
-      const m = meteors[i];
-      m.life += dt;
-      if (m.life >= m.maxLife) { meteors.splice(i, 1); continue; }
-      const k = 1 - m.life / m.maxLife;        // 1 → 0 淡出
-      const alpha = k * k * 0.6;               // 缓出淡出，更柔和
-      const hx = m.x, hy = m.y;
-      const tx = m.x + m.tx * m.tail, ty = m.y + m.ty * m.tail;
-      // 尾巴：头部银紫星光 → 尾部透明；与页面同色系，又区别于白色星点
-      const grad = ctx.createLinearGradient(hx, hy, tx, ty);
-      grad.addColorStop(0, 'rgba(201,189,240,' + alpha + ')');
-      grad.addColorStop(1, 'rgba(176,166,216,0)');
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = 1.5;
-      ctx.lineCap = 'round';
+  function updateStarlight(dt) {
+    for (let i = starlights.length - 1; i >= 0; i--) {
+      const s = starlights[i];
+      s.life += dt;
+      if (s.life >= s.maxLife) { starlights.splice(i, 1); continue; }
+      const t = s.life / s.maxLife;
+      const alpha = Math.sin(Math.PI * t) * 0.5;   // 柔缓淡入 → 淡出
+      const R = s.r * 2.6;
+      const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, R);
+      grad.addColorStop(0, 'rgba(' + s.color + ',' + alpha + ')');
+      grad.addColorStop(0.4, 'rgba(' + s.color + ',' + (alpha * 0.45) + ')');
+      grad.addColorStop(1, 'rgba(' + s.color + ',0)');
+      ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.moveTo(hx, hy);
-      ctx.lineTo(tx, ty);
-      ctx.stroke();
-      // 头部星光亮点（银紫）
-      ctx.fillStyle = 'rgba(201,189,240,' + alpha + ')';
-      ctx.beginPath();
-      ctx.arc(hx, hy, 1.3, 0, Math.PI * 2);
+      ctx.arc(s.x, s.y, R, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -216,8 +202,8 @@
     }
     ctx.globalAlpha = 1;
 
-    // 流星（跟随鼠标，少量）
-    if (!reduced) updateMeteors(dt);
+    // 星光（跟随鼠标，柔缓点状）
+    if (!reduced) updateStarlight(dt);
 
     requestAnimationFrame(frame);
   }
