@@ -1,38 +1,50 @@
 /**
  * nebula.js —— 全屏星云粒子背景（原生 Canvas，无第三方库、无外部图片）
- * 效果（对标真实哈勃星系的静谧质感）：
- *   1. 入场动画：粒子从屏幕外四散状态缓慢「汇聚成型」（约 4 秒，慢入慢出）
+ * 效果：
+ *   1. 入场动画：粒子从四散状态「汇聚成型」—— 仅在首次访问时播放一次
  *   2. 环境态：星尘缓慢漂移 + 极慢的整体星系自转
  *   3. 视差：粒子按深度呈现「近大远小、近亮远暗」
- *   4. 星芒：预渲染柔光贴图，低性能消耗、帧率稳定
- * 实现：requestAnimationFrame + 离屏柔光 Sprite，柔和内敛、无爆炸闪光
+ *   4. 主题：随白天 / 黑夜切换粒子配色（由 theme.js 调用 applyTheme）
+ * 实现：requestAnimationFrame + 离屏柔光 Sprite，柔和内敛
  */
 (function () {
   const canvas = document.getElementById('nebula');
-  if (!canvas) return;                 // 页面没有该画布时直接跳过
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  // 是否偏好减少动画（无障碍）
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let W = 0, H = 0;
-  const DPR = Math.min(window.devicePixelRatio || 1, 2); // 限制像素比，兼顾清晰度与性能
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
-  // 星空配色（RGB，紫色调浅、偏银紫）—— 星光亮白为主，银紫星云点缀
-  const PALETTE = [
-    [248, 251, 255],   // 星光亮白 #F8FBFF（多数）
-    [255, 255, 255],   // 星点高光 #FFFFFF
-    [248, 251, 255],
-    [176, 166, 216],   // 淡银紫 #B0A6D8（soft）
-    [138, 116, 196],   // 银紫 #8A74C4
-    [51, 37, 92],      // 暗星云紫 #33255C（少量）
-  ];
+  // 两套粒子配色：黑夜（银紫深空）/ 白天（银灰淡紫）
+  const PALETTES = {
+    dark: [
+      [248, 251, 255],   // 星光亮白（多数）
+      [255, 255, 255],
+      [248, 251, 255],
+      [176, 166, 216],   // 淡银紫
+      [138, 116, 196],   // 银紫
+      [51, 37, 92],      // 暗星云紫（少量）
+    ],
+    light: [
+      [150, 150, 182],   // 银灰蓝
+      [122, 114, 168],   // 银紫灰
+      [172, 168, 204],   // 淡银紫
+      [140, 134, 180],   // 银紫
+      [190, 187, 216],   // 更淡银紫
+      [104, 104, 150],   // 深银灰
+    ],
+  };
 
-  // 粒子数量：随屏幕自适应，封顶保证性能
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+
   const COUNT = Math.min(200, Math.max(120, Math.floor(window.innerWidth * 0.12)));
-  const CONVERGE_MS = 4200;            // 汇聚动画时长（毫秒）
+  const CONVERGE_MS = 4200;   // 汇聚动画时长（毫秒）
 
-  // 预渲染每颗颜色的柔光 Sprite（避免逐帧画径向渐变，性能更好）
+  // 预渲染柔光 Sprite
   function makeSprite(rgb) {
     const s = 64;
     const c = document.createElement('canvas');
@@ -46,7 +58,15 @@
     g.fillRect(0, 0, s, s);
     return c;
   }
-  const sprites = PALETTE.map(makeSprite);
+
+  let palette = PALETTES[currentTheme()];
+  let sprites = palette.map(makeSprite);
+
+  // 开场汇聚动画：仅首次访问播放（用 localStorage 记住）
+  const INTRO_KEY = 'rt-intro-seen';
+  let introSeen = false;
+  try { introSeen = !!localStorage.getItem(INTRO_KEY); } catch (e) {}
+  let introMarked = introSeen;
 
   function resize() {
     W = window.innerWidth;
@@ -59,27 +79,23 @@
   }
   resize();
 
-  // 高斯随机：让锚点更偏向中心，形成松散的星云团
   function gauss() {
     return (Math.random() + Math.random() + Math.random()) / 3 - 0.5;
   }
 
-  // 生成单个粒子
   function makeParticle(scattered) {
     const p = {
-      ci: (Math.random() * PALETTE.length) | 0, // 颜色索引
-      z: Math.random(),                          // 深度 0~1：越大越近
-      size: 0.6 + Math.random() * 2.2,           // 近大远小（半径基数）
-      alpha: 0.10 + Math.random() * 0.28,        // 近亮远暗（基础透明度）
-      orbitR: 20 + Math.random() * 240,          // 自转轨道半径（深层更靠外，视差更强）
-      orbitA: Math.random() * Math.PI * 2,       // 自转相位
-      orbitV: (Math.random() - 0.5) * 0.08,      // 自转角速度（极慢）
-      driftX: (Math.random() - 0.5) * 0.05,      // 漂移速度
+      ci: (Math.random() * palette.length) | 0,
+      z: Math.random(),
+      size: 0.6 + Math.random() * 2.2,
+      alpha: 0.10 + Math.random() * 0.28,
+      orbitR: 20 + Math.random() * 240,
+      orbitA: Math.random() * Math.PI * 2,
+      orbitV: (Math.random() - 0.5) * 0.08,
+      driftX: (Math.random() - 0.5) * 0.05,
       driftY: (Math.random() - 0.5) * 0.05,
-      dx: 0, dy: 0,                              // 漂移累计位移
+      dx: 0, dy: 0,
     };
-
-    // 汇聚起点：屏幕外较远处（四散状态）
     if (scattered) {
       const a = Math.random() * Math.PI * 2;
       const d = Math.max(W, H) * (0.6 + Math.random() * 0.9);
@@ -89,16 +105,14 @@
       p.sx = Math.random() * W;
       p.sy = Math.random() * H;
     }
-    // 最终锚点：偏向中心
     p.tx = W / 2 + gauss() * W * 0.9;
     p.ty = H / 2 + gauss() * H * 0.9;
     return p;
   }
 
   const ps = [];
-  for (let i = 0; i < COUNT; i++) ps.push(makeParticle(true));
+  for (let i = 0; i < COUNT; i++) ps.push(makeParticle(!introSeen));
 
-  // 慢入慢出缓动
   function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
@@ -107,10 +121,15 @@
 
   function frame(now) {
     const elapsed = now - start;
-    // 汇聚进度 0→1；完成后自然退化为环境漂移
-    const k = reduced ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
-    // 全局自转角：极慢（约 14 分钟转一圈），营造星系自转
+    // 汇聚进度：首次访问才走 0→1；非首次 / 减少动画则直接为 1
+    const k = (reduced || introSeen) ? 1 : easeInOutCubic(Math.min(1, elapsed / CONVERGE_MS));
     const spin = elapsed * 0.00012;
+
+    // 首次汇聚完成后，标记「已看过」，下次访问不再播放
+    if (!introMarked && elapsed > CONVERGE_MS) {
+      introMarked = true;
+      try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
+    }
 
     ctx.clearRect(0, 0, W, H);
 
@@ -120,22 +139,17 @@
       p.dx += p.driftX;
       p.dy += p.driftY;
 
-      // 汇聚插值：起点 → 锚点
       const lx = p.sx + (p.tx - p.sx) * k;
       const ly = p.sy + (p.ty - p.sy) * k;
-      // 自转偏移（随汇聚逐渐成形）
       const ox = Math.cos(p.orbitA + spin) * p.orbitR * k;
       const oy = Math.sin(p.orbitA + spin) * p.orbitR * k;
-      // 缓慢漂移
       const x = lx + ox + p.dx;
       const y = ly + oy + p.dy;
 
-      // 柔和包裹回屏，避免粒子突然消失
       const m = 90;
       const px = ((((x + m) % (W + m * 2)) + (W + m * 2)) % (W + m * 2)) - m;
       const py = ((((y + m) % (H + m * 2)) + (H + m * 2)) % (H + m * 2)) - m;
 
-      // 汇聚过程中渐亮，成型后的星云更柔和明亮
       const r = p.size * 3.4;
       ctx.globalAlpha = p.alpha * (0.4 + 0.6 * k);
       ctx.drawImage(sprites[p.ci], px - r, py - r, r * 2, r * 2);
@@ -145,6 +159,13 @@
   }
   requestAnimationFrame(frame);
 
-  // 窗口缩放时重新计算尺寸（粒子锚点不重算，保持环境稳定）
+  // 暴露给 theme.js：主题切换时更新粒子配色
+  window.Card = window.Card || {};
+  window.Card.applyTheme = function (theme) {
+    palette = PALETTES[theme] || PALETTES.dark;
+    sprites = palette.map(makeSprite);
+    for (let i = 0; i < ps.length; i++) ps[i].ci = (Math.random() * palette.length) | 0;
+  };
+
   window.addEventListener('resize', resize);
 })();
