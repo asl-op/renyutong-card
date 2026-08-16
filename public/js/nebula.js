@@ -105,21 +105,28 @@
 
   // ---------- 流星（跟随鼠标，少量，柔和） ----------
   const meteors = [];
-  const MOUSE_SPAWN_DIST = 36;   // 鼠标每移动约 36px 生成一颗，更稀疏柔和
-  const MAX_METEORS = 10;        // 同时最多 10 颗
+  const MOUSE_SPAWN_DIST = 48;   // 鼠标每移动约 48px 触发一簇流星雨
+  const MAX_METEORS = 24;        // 同时最多 24 颗（可容纳多簇）
   let mouseX = -9999, mouseY = -9999, mouseAcc = 0;
 
-  function spawnMeteor(x, y, dx, dy) {
+  function spawnBurst(x, y, dx, dy) {
     const len = Math.hypot(dx, dy) || 1;
-    const nx = dx / len, ny = dy / len;   // 鼠标运动方向
-    meteors.push({
-      x: x, y: y,
-      tx: -nx, ty: -ny,                   // 尾巴指向运动反方向，形成拖尾跟随
-      tail: 16 + Math.random() * 22,      // 尾巴长度
-      life: 0,
-      maxLife: 0.55 + Math.random() * 0.4,  // 存活时长（秒），更舒缓
-    });
-    if (meteors.length > MAX_METEORS) meteors.shift();
+    const nx = dx / len, ny = dy / len;
+    const baseAngle = Math.atan2(-ny, -nx);   // 拖尾基准方向（运动反方向）
+    const n = 4 + Math.floor(Math.random() * 3); // 每簇 4~6 颗，形成流星雨
+    for (let i = 0; i < n; i++) {
+      const a = baseAngle + (Math.random() - 0.5) * 1.1; // 围绕基准方向 ±~31°，聚集放射
+      meteors.push({
+        x: x + (Math.random() - 0.5) * 30,   // 聚集在光标附近
+        y: y + (Math.random() - 0.5) * 30,
+        tx: Math.cos(a),
+        ty: Math.sin(a),
+        tail: 14 + Math.random() * 26,       // 尾巴长度
+        life: 0,
+        maxLife: 0.5 + Math.random() * 0.5,  // 存活时长（秒）
+      });
+    }
+    while (meteors.length > MAX_METEORS) meteors.shift();
   }
 
   function onMove(x, y) {
@@ -128,7 +135,7 @@
     const dx = x - mouseX, dy = y - mouseY;
     mouseAcc += Math.hypot(dx, dy);
     if (mouseAcc >= MOUSE_SPAWN_DIST) {
-      spawnMeteor(x, y, dx, dy);
+      spawnBurst(x, y, dx, dy);
       mouseAcc = 0;
     }
     mouseX = x; mouseY = y;
